@@ -1,2 +1,0 @@
-This file is only here to keep the starter structure simple for a beginner.
-You can later move helpers like token generation into a real utils folder.
