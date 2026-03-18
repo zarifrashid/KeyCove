@@ -85,6 +85,7 @@ export function buildDhakaProperties(managerId) {
         bedrooms,
         bathrooms,
         squareFeet,
+        availableFrom: new Date(Date.now() + ((globalIndex % 6) - 2) * 86400000 * 7),
         image: featureImagePool[globalIndex % featureImagePool.length],
         imageAlt: `${propertyType} in ${areaData.area}`,
         manager: managerId,

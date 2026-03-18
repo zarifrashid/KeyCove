@@ -47,6 +47,10 @@ const propertySchema = new mongoose.Schema(
       default: 600,
       min: 100
     },
+    availableFrom: {
+      type: Date,
+      default: Date.now
+    },
     image: {
       type: String,
       required: true
@@ -90,5 +94,13 @@ const propertySchema = new mongoose.Schema(
 
 propertySchema.index({ geoLocation: '2dsphere' })
 propertySchema.index({ status: 1, 'location.area': 1, price: 1 })
+propertySchema.index({ status: 1, price: 1 })
+propertySchema.index({ status: 1, bedrooms: 1 })
+propertySchema.index({ status: 1, bathrooms: 1 })
+propertySchema.index({ status: 1, squareFeet: 1 })
+propertySchema.index({ status: 1, propertyType: 1 })
+propertySchema.index({ status: 1, listingType: 1 })
+propertySchema.index({ amenities: 1 })
+propertySchema.index({ createdAt: -1 })
 
 export default mongoose.model('Property', propertySchema)

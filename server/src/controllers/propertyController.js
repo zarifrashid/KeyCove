@@ -1,5 +1,7 @@
 import Property from '../models/Property.js'
 import SearchQuery from '../models/SearchQuery.js'
+import { buildPropertyFilter, extractSearchSnapshot } from '../utils/searchFilters.js'
+import { buildSortOption } from '../utils/searchSort.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -11,83 +13,51 @@ function parseNumber(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
-function buildBoundsFilter({ northEastLat, northEastLng, southWestLat, southWestLng }) {
-  const hasBounds = [northEastLat, northEastLng, southWestLat, southWestLng].every((value) => value !== undefined)
+async function logSearchQuery({ req, total, page, limit, sortOption, source, zoom }) {
+  const snapshot = extractSearchSnapshot(req.query)
 
-  if (!hasBounds) return null
-
-  const neLat = Number(northEastLat)
-  const neLng = Number(northEastLng)
-  const swLat = Number(southWestLat)
-  const swLng = Number(southWestLng)
-
-  if (![neLat, neLng, swLat, swLng].every(Number.isFinite)) return null
-
-  return {
-    'location.latitude': { $gte: swLat, $lte: neLat },
-    'location.longitude': { $gte: swLng, $lte: neLng }
-  }
+  await SearchQuery.create({
+    user: req.user?.userId || null,
+    searchText: snapshot.searchText,
+    area: snapshot.area,
+    center: {
+      latitude: snapshot.center.latitude ?? DHAKA_CENTER.latitude,
+      longitude: snapshot.center.longitude ?? DHAKA_CENTER.longitude
+    },
+    bounds: snapshot.bounds,
+    filters: snapshot.filters,
+    sortOption,
+    zoom,
+    page,
+    pageSize: limit,
+    resultCount: total,
+    source
+  }).catch(() => null)
 }
 
-export async function getMapProperties(req, res) {
+export async function searchProperties(req, res) {
   try {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
     const limit = Math.min(30, Math.max(1, parseInt(req.query.limit || '9', 10)))
-    const search = (req.query.search || '').trim()
-    const area = (req.query.area || '').trim()
     const source = req.query.source || 'search'
+    const sortOption = req.query.sort || 'newest'
     const lat = parseNumber(req.query.lat, DHAKA_CENTER.latitude)
     const lng = parseNumber(req.query.lng, DHAKA_CENTER.longitude)
     const zoom = parseNumber(req.query.zoom, 12)
 
-    const filter = { status: 'active' }
-    const textConditions = []
+    const filter = buildPropertyFilter(req.query)
+    const sort = buildSortOption(sortOption)
 
-    if (search) {
-      const searchRegex = new RegExp(search, 'i')
-      textConditions.push(
-        { title: searchRegex },
-        { description: searchRegex },
-        { 'location.area': searchRegex },
-        { 'location.address': searchRegex },
-        { 'location.city': searchRegex },
-        { propertyType: searchRegex }
-      )
-    }
+    const [total, properties] = await Promise.all([
+      Property.countDocuments(filter),
+      Property.find(filter)
+        .sort(sort)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean()
+    ])
 
-    if (area) {
-      textConditions.push({ 'location.area': new RegExp(`^${area}$`, 'i') })
-    }
-
-    if (textConditions.length) {
-      filter.$or = textConditions
-    }
-
-    const boundsFilter = buildBoundsFilter(req.query)
-    if (boundsFilter) {
-      Object.assign(filter, boundsFilter)
-    }
-
-    const total = await Property.countDocuments(filter)
-    const properties = await Property.find(filter)
-      .sort({ price: 1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean()
-
-    await SearchQuery.create({
-      user: req.user?.userId || null,
-      searchText: search,
-      area,
-      center: {
-        latitude: lat,
-        longitude: lng
-      },
-      zoom,
-      page,
-      resultCount: total,
-      source
-    }).catch(() => null)
+    await logSearchQuery({ req, total, page, limit, sortOption, source, zoom })
 
     res.status(200).json({
       success: true,
@@ -101,14 +71,17 @@ export async function getMapProperties(req, res) {
       meta: {
         center: { latitude: lat, longitude: lng },
         zoom,
-        area: area || 'Dhaka',
-        search
+        area: req.query.area || 'Dhaka',
+        search: req.query.search || '',
+        sort: sortOption
       }
     })
   } catch (error) {
-    res.status(500).json({ message: error.message || 'Failed to load map properties' })
+    res.status(500).json({ message: error.message || 'Failed to search properties' })
   }
 }
+
+export const getMapProperties = searchProperties
 
 export async function getPropertyById(req, res) {
   try {
