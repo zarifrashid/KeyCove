@@ -49,7 +49,7 @@ export default function PropertyDetailsPage() {
                     <div><strong>Amenities:</strong> {property.amenities?.join(', ')}</div>
                   </div>
                   <div className="hero-actions">
-                    <Link to="/" className="secondary-btn">Back to Map</Link>
+                    <Link to="/explore" className="secondary-btn">Back to Map</Link>
                     <a
                       className="primary-btn"
                       href={`https://www.openstreetmap.org/?mlat=${property.location.latitude}&mlon=${property.location.longitude}#map=16/${property.location.latitude}/${property.location.longitude}`}

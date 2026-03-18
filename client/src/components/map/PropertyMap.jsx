@@ -89,13 +89,6 @@ export default function PropertyMap({
           </Marker>
         ))}
       </MapContainer>
-
-      {selectedProperty && (
-        <div className="map-selected-pill">
-          <span>{selectedProperty.title}</span>
-          <strong>৳ {selectedProperty.price.toLocaleString()}</strong>
-        </div>
-      )}
     </div>
   )
 }
