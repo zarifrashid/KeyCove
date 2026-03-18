@@ -11,7 +11,12 @@ export default function PropertyCard({ property, isActive, onSelect }) {
         </div>
         <h3>{property.title}</h3>
         <p className="property-location">{property.location.address}, {property.location.area}, {property.location.city}</p>
-        <p className="property-summary">{property.bedrooms} bed • {property.bathrooms} bath • {property.squareFeet} sqft</p>
+        <p className="property-summary">{property.bedrooms} bed • {property.bathrooms} bath • {property.squareFeet} sqft • {property.listingType}</p>
+        <div className="amenity-preview-row">
+          {property.amenities?.slice(0, 3).map((amenity) => (
+            <span key={amenity} className="mini-amenity-chip">{amenity}</span>
+          ))}
+        </div>
         <div className="property-card-actions">
           <button type="button" className="secondary-btn" onClick={(event) => { event.stopPropagation(); onSelect(property) }}>
             Open in Map
