@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export default function SearchBar({ initialValue = '', onSearch, onUseCurrentLocation, onReset }) {
+export default function SearchBar({ initialValue = '', onSearch, compact = false }) {
   const [input, setInput] = useState(initialValue)
 
   useEffect(() => {
@@ -9,24 +9,19 @@ export default function SearchBar({ initialValue = '', onSearch, onUseCurrentLoc
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    onSearch(input)
+    onSearch(input.trim())
   }
 
   return (
-    <form className="search-bar" onSubmit={handleSubmit}>
+    <form className={`search-bar ${compact ? 'compact' : ''}`} onSubmit={handleSubmit}>
       <input
         type="text"
         value={input}
         onChange={(event) => setInput(event.target.value)}
-        placeholder="Search Dhaka area, title, amenity, or property type"
+        placeholder="Panel / area / title / amenity"
+        aria-label="Search by area or keyword"
       />
-      <button type="submit" className="primary-btn">Search Location</button>
-      <button type="button" className="secondary-btn" onClick={() => onUseCurrentLocation()}>
-        Use Current Location
-      </button>
-      <button type="button" className="secondary-btn" onClick={() => { setInput(''); onReset() }}>
-        Reset Map
-      </button>
+      <button type="submit" className="primary-btn">Go</button>
     </form>
   )
 }

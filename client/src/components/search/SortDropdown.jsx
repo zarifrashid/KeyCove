@@ -1,16 +1,12 @@
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
   { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'beds_desc', label: 'Most Bedrooms' },
-  { value: 'baths_desc', label: 'Most Bathrooms' },
-  { value: 'sqft_desc', label: 'Largest Area' },
-  { value: 'area_asc', label: 'Area Name (A-Z)' }
+  { value: 'price_desc', label: 'Price: High to Low' }
 ]
 
-export default function SortDropdown({ value, onChange }) {
+export default function SortDropdown({ value, onChange, compact = false }) {
   return (
-    <label className="sort-dropdown">
+    <label className={`sort-dropdown ${compact ? 'compact' : ''}`}>
       <span>Sort By</span>
       <select value={value} onChange={(event) => onChange(event.target.value)}>
         {SORT_OPTIONS.map((option) => (

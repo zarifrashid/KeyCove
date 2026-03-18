@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 
-export default function PropertyCard({ property, isActive, onSelect }) {
+export default function PropertyCard({ property, isActive, onSelect, compact = false }) {
   return (
-    <article className={`property-card ${isActive ? 'active' : ''}`} onClick={() => onSelect(property)}>
+    <article className={`property-card ${compact ? 'compact' : ''} ${isActive ? 'active' : ''}`} onClick={() => onSelect(property)}>
       <img className="property-card-image" src={property.image} alt={property.imageAlt} />
       <div className="property-card-body">
         <div className="property-card-topline">
@@ -13,11 +13,11 @@ export default function PropertyCard({ property, isActive, onSelect }) {
         <p className="property-location">{property.location.address}, {property.location.area}, {property.location.city}</p>
         <p className="property-summary">{property.bedrooms} bed • {property.bathrooms} bath • {property.squareFeet} sqft • {property.listingType}</p>
         <div className="amenity-preview-row">
-          {property.amenities?.slice(0, 3).map((amenity) => (
+          {property.amenities?.slice(0, compact ? 2 : 3).map((amenity) => (
             <span key={amenity} className="mini-amenity-chip">{amenity}</span>
           ))}
         </div>
-        <div className="property-card-actions">
+        <div className="property-card-actions compact-actions">
           <button type="button" className="secondary-btn" onClick={(event) => { event.stopPropagation(); onSelect(property) }}>
             Open in Map
           </button>

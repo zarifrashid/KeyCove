@@ -1,7 +1,7 @@
 import Property from '../models/Property.js'
 import SearchQuery from '../models/SearchQuery.js'
 import { buildPropertyFilter, extractSearchSnapshot } from '../utils/searchFilters.js'
-import { buildSortOption } from '../utils/searchSort.js'
+import { buildSortOption, normalizeSortOption } from '../utils/searchSort.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -40,7 +40,7 @@ export async function searchProperties(req, res) {
     const page = Math.max(1, parseInt(req.query.page || '1', 10))
     const limit = Math.min(30, Math.max(1, parseInt(req.query.limit || '9', 10)))
     const source = req.query.source || 'search'
-    const sortOption = req.query.sort || 'newest'
+    const sortOption = normalizeSortOption(req.query.sort || 'newest')
     const lat = parseNumber(req.query.lat, DHAKA_CENTER.latitude)
     const lng = parseNumber(req.query.lng, DHAKA_CENTER.longitude)
     const zoom = parseNumber(req.query.zoom, 12)
