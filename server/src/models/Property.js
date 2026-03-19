@@ -4,18 +4,18 @@ const propertySchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
-      trim: true
+      trim: true,
+      default: ''
     },
     description: {
       type: String,
-      required: true,
-      trim: true
+      trim: true,
+      default: ''
     },
     price: {
       type: Number,
-      required: true,
-      min: 0
+      min: 0,
+      default: 0
     },
     propertyType: {
       type: String,
@@ -29,8 +29,8 @@ const propertySchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive'],
-      default: 'active'
+      enum: ['draft', 'active', 'inactive', 'deleted'],
+      default: 'draft'
     },
     bedrooms: {
       type: Number,
@@ -45,7 +45,7 @@ const propertySchema = new mongoose.Schema(
     squareFeet: {
       type: Number,
       default: 600,
-      min: 100
+      min: 0
     },
     availableFrom: {
       type: Date,
@@ -53,25 +53,51 @@ const propertySchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: true
+      default: ''
     },
     imageAlt: {
       type: String,
       default: 'Property photo'
     },
+    images: [
+      {
+        url: {
+          type: String,
+          trim: true
+        },
+        sortOrder: {
+          type: Number,
+          default: 0
+        },
+        uploadedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     manager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
     },
     amenities: [{ type: String }],
+    policies: {
+      utilities: { type: String, default: '' },
+      pet: { type: String, default: '' },
+      income: { type: String, default: '' }
+    },
+    nearbyPlaces: {
+      school: { type: String, default: '' },
+      bus: { type: String, default: '' },
+      restaurant: { type: String, default: '' }
+    },
     location: {
-      address: { type: String, required: true, trim: true },
-      area: { type: String, required: true, trim: true },
-      city: { type: String, required: true, trim: true, default: 'Dhaka' },
+      address: { type: String, trim: true, default: '' },
+      area: { type: String, trim: true, default: '' },
+      city: { type: String, trim: true, default: 'Dhaka' },
       postalCode: { type: String, trim: true, default: '' },
-      latitude: { type: Number, required: true },
-      longitude: { type: Number, required: true }
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null }
     },
     geoLocation: {
       type: {
@@ -81,7 +107,7 @@ const propertySchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number],
-        required: true,
+        default: [90.4125, 23.8103],
         validate: {
           validator: (value) => Array.isArray(value) && value.length === 2,
           message: 'Coordinates must contain [longitude, latitude]'

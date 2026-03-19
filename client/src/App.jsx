@@ -33,7 +33,15 @@ export default function App() {
       <Route
         path="/add-property"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRole="manager">
+            <AddPropertyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/:id/edit"
+        element={
+          <ProtectedRoute allowedRole="manager">
             <AddPropertyPage />
           </ProtectedRoute>
         }
