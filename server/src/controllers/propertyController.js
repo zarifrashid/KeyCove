@@ -3,6 +3,7 @@ import Property from '../models/Property.js'
 import SearchQuery from '../models/SearchQuery.js'
 import { buildPropertyFilter, extractSearchSnapshot } from '../utils/searchFilters.js'
 import { buildSortOption, normalizeSortOption } from '../utils/searchSort.js'
+import { deleteNeighbourhoodInsightForProperty, generateNeighbourhoodInsightForProperty } from '../services/neighbourhood/insightGenerator.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -167,6 +168,13 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
   }
 }
 
+
+async function syncNeighbourhoodInsight(property) {
+  if (!property || property.status !== 'active') return
+
+  await generateNeighbourhoodInsightForProperty(property).catch(() => null)
+}
+
 async function logSearchQuery({ req, total, page, limit, sortOption, source, zoom }) {
   const snapshot = extractSearchSnapshot(req.query)
 
@@ -322,6 +330,7 @@ export async function createProperty(req, res) {
     }
 
     const property = await Property.create(payload)
+    await syncNeighbourhoodInsight(property)
 
     res.status(201).json({
       success: true,
@@ -357,6 +366,7 @@ export async function updateProperty(req, res) {
 
     Object.assign(existingProperty, payload)
     await existingProperty.save()
+    await syncNeighbourhoodInsight(existingProperty)
 
     res.status(200).json({
       success: true,
@@ -382,6 +392,7 @@ export async function deleteProperty(req, res) {
 
     property.status = 'deleted'
     await property.save()
+    await deleteNeighbourhoodInsightForProperty(property._id).catch(() => null)
 
     res.status(200).json({
       success: true,
