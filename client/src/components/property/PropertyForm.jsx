@@ -18,14 +18,6 @@ const COMMON_AMENITIES = [
   'CCTV'
 ]
 
-function ToolbarButton({ label }) {
-  return (
-    <button type="button" className="property-toolbar-btn" tabIndex={-1}>
-      {label}
-    </button>
-  )
-}
-
 function Field({ label, children }) {
   return (
     <label className="property-field">
@@ -90,16 +82,6 @@ export default function PropertyForm({
         <label className="property-field full-width">
           <span>Description</span>
           <div className="property-editor-shell">
-            <div className="property-editor-toolbar" aria-hidden="true">
-              <ToolbarButton label="Heading 1" />
-              <ToolbarButton label="B" />
-              <ToolbarButton label="I" />
-              <ToolbarButton label="U" />
-              <ToolbarButton label="Link" />
-              <ToolbarButton label="• List" />
-              <ToolbarButton label="1. List" />
-              <ToolbarButton label="Tx" />
-            </div>
             <textarea
               className="property-description-input"
               value={form.description}

@@ -1965,3 +1965,235 @@ body {
     align-items: stretch;
   }
 }
+
+/* Feature 4: Neighbourhood Insights */
+.details-stack {
+  width: min(1200px, 100%);
+  display: grid;
+  gap: 20px;
+}
+
+.neighbourhood-card {
+  display: grid;
+  gap: 20px;
+}
+
+.neighbourhood-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.neighbourhood-card-header h2 {
+  margin: 8px 0 6px;
+}
+
+.neighbourhood-card-header p {
+  margin: 0;
+  color: #64748b;
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+.neighbourhood-loading,
+.insight-empty-state {
+  border: 1px dashed #d7e2ef;
+  background: #f8fbff;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.insight-empty-state h3 {
+  margin: 0 0 8px;
+}
+
+.insight-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.insight-tab-btn {
+  border: 1px solid #d7e2ef;
+  background: #f8fbff;
+  color: #0f4c81;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.insight-tab-btn.active {
+  background: #0f4c81;
+  color: white;
+  border-color: #0f4c81;
+}
+
+.insight-tab-content-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.insight-tab-content-grid.two-col,
+.insight-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.insight-score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.insight-score-grid.wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.insight-score-grid.single {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.insight-score-card,
+.insight-panel-card,
+.insight-summary-card {
+  border: 1px solid #e1ebf7;
+  background: #fbfdff;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.insight-score-card {
+  display: grid;
+  gap: 6px;
+}
+
+.insight-score-card span {
+  font-size: 14px;
+  color: #607080;
+  font-weight: 700;
+}
+
+.insight-score-card strong {
+  font-size: 1.6rem;
+  color: #10243f;
+}
+
+.insight-score-card small,
+.insight-place-item span,
+.insight-note-text,
+.insight-last-updated {
+  color: #64748b;
+}
+
+.insight-summary-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.insight-summary-card p,
+.insight-panel-card p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.insight-panel-card h3 {
+  margin: 0 0 12px;
+}
+
+.insight-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.insight-place-list {
+  display: grid;
+  gap: 10px;
+}
+
+.insight-place-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid #e8eef7;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: white;
+}
+
+.insight-place-item div {
+  display: grid;
+  gap: 4px;
+}
+
+.insight-place-item small {
+  color: #0f4c81;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.neighbourhood-map-shell {
+  border: 1px solid #e2ebf5;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #edf4fb;
+}
+
+.neighbourhood-mini-map {
+  width: 100%;
+  height: 360px;
+}
+
+.neighbourhood-map-marker span {
+  display: block;
+  border-radius: 999px;
+}
+
+.neighbourhood-map-marker-property span {
+  width: 20px;
+  height: 20px;
+  background: #0f4c81;
+  border: 4px solid white;
+  box-shadow: 0 10px 20px rgba(15, 76, 129, 0.26);
+}
+
+.neighbourhood-map-marker-place span {
+  width: 16px;
+  height: 16px;
+  background: #8d78ff;
+  border: 3px solid white;
+  box-shadow: 0 8px 18px rgba(107, 92, 255, 0.22);
+}
+
+.neighbourhood-popup-card {
+  width: 180px;
+}
+
+.neighbourhood-inline-message {
+  margin: 0;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .insight-score-grid,
+  .insight-score-grid.wide,
+  .insight-score-grid.single,
+  .insight-tab-content-grid.two-col,
+  .insight-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .neighbourhood-card-header {
+    align-items: stretch;
+  }
+}
