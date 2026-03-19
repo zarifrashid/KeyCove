@@ -1568,3 +1568,400 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Feature 14: Add Property and manager dashboard */
+.add-property-page-wrap {
+  align-items: start;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.add-property-form-card {
+  max-width: 1160px;
+  padding: 28px;
+}
+
+.manager-loading-box {
+  min-height: 420px;
+}
+
+.property-form-shell {
+  display: grid;
+  gap: 24px;
+}
+
+.property-form-header-row h1 {
+  margin: 8px 0 8px;
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  color: #111827;
+}
+
+.property-form-subtext {
+  margin: 0;
+  color: #667085;
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+.property-form-error {
+  margin: 0;
+}
+
+.property-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.property-grid.three-col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.property-grid.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.property-field {
+  display: grid;
+  gap: 8px;
+}
+
+.property-field span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #202633;
+}
+
+.property-field input,
+.property-field select,
+.property-field textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #cfd4dc;
+  background: #fff;
+  font-size: 15px;
+  color: #18212f;
+}
+
+.property-field input:focus,
+.property-field select:focus,
+.property-field textarea:focus {
+  outline: none;
+  border-color: #8d78ff;
+  box-shadow: 0 0 0 4px rgba(141, 120, 255, 0.12);
+}
+
+.property-field.full-width {
+  width: 100%;
+}
+
+.property-description-wrap {
+  display: grid;
+}
+
+.property-editor-shell {
+  border: 1px solid #cfd4dc;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.property-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.property-toolbar-btn {
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #d6dae1;
+  background: white;
+  font-weight: 600;
+  color: #374151;
+}
+
+.property-description-input {
+  min-height: 260px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  resize: vertical;
+}
+
+.property-small-textarea {
+  min-height: 90px !important;
+  resize: vertical;
+}
+
+.property-bottom-grid {
+  align-items: start;
+}
+
+.property-side-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.property-amenity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.amenity-pill {
+  border: 1px solid #d9ddf1;
+  background: #f8f7ff;
+  color: #5c49ea;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.amenity-pill.active {
+  background: linear-gradient(135deg, #8d78ff, #6b5cff);
+  color: white;
+  border-color: transparent;
+}
+
+.property-preview-card {
+  border: 1px solid #e4e7ef;
+  border-radius: 18px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  background: #fafbff;
+}
+
+.property-preview-card span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333b4b;
+}
+
+.property-preview-image {
+  width: 100%;
+  height: 230px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.property-preview-placeholder {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 14px;
+  border: 1px dashed #d7dcec;
+  color: #667085;
+  background: white;
+  padding: 20px;
+}
+
+.property-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ghost-action-btn,
+.danger-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ghost-action-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.danger-btn {
+  background: #fee2e2;
+  color: #b42318;
+}
+
+.manager-dashboard-wrap {
+  align-items: start;
+}
+
+.manager-dashboard-shell {
+  width: min(1180px, 100%);
+  display: grid;
+  gap: 22px;
+}
+
+.manager-dashboard-hero p,
+.manager-list-header p,
+.manager-property-topline p {
+  color: #667085;
+}
+
+.manager-dashboard-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.manager-info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.manager-dashboard-list-card {
+  display: grid;
+  gap: 18px;
+}
+
+.manager-list-header h3 {
+  margin: 0;
+}
+
+.manager-list-header p {
+  margin: 8px 0 0;
+}
+
+.manager-flash-text {
+  margin: 0;
+}
+
+.manager-empty-state {
+  border: 1px dashed #d0d8e6;
+  border-radius: 18px;
+  padding: 32px;
+  text-align: center;
+  color: #667085;
+}
+
+.manager-empty-state h3 {
+  margin: 0 0 8px;
+  color: #1f2937;
+}
+
+.manager-property-list {
+  display: grid;
+  gap: 16px;
+}
+
+.manager-property-card {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  border: 1px solid #e6eaf2;
+  border-radius: 20px;
+  padding: 16px;
+  background: #fff;
+}
+
+.manager-property-image-wrap {
+  min-width: 0;
+}
+
+.manager-property-image {
+  width: 100%;
+  height: 170px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.manager-property-content {
+  display: grid;
+  gap: 14px;
+}
+
+.manager-property-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+}
+
+.manager-property-topline h3 {
+  margin: 8px 0 6px;
+}
+
+.manager-property-topline p {
+  margin: 0;
+}
+
+.manager-status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-active {
+  background: #dcfae6;
+  color: #027a48;
+}
+
+.status-draft {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+.status-inactive {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.manager-property-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.manager-property-meta span {
+  background: #f5f7fb;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #475467;
+  font-weight: 600;
+}
+
+.manager-property-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 980px) {
+  .property-grid.three-col,
+  .property-grid.two-col,
+  .manager-property-card,
+  .manager-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-property-image {
+    height: 220px;
+  }
+}
+
+@media (max-width: 720px) {
+  .add-property-form-card,
+  .manager-dashboard-hero,
+  .manager-dashboard-list-card {
+    padding: 20px;
+  }
+
+  .property-form-actions,
+  .manager-dashboard-actions,
+  .manager-property-actions,
+  .manager-property-topline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

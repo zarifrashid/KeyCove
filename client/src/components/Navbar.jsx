@@ -50,7 +50,7 @@ export default function Navbar() {
           <>
             <Link to="/">Landing</Link>
             <Link to="/explore">Explore Map</Link>
-            <Link to="/add-property">Add Property</Link>
+            {user?.role === 'manager' ? <Link to="/add-property">Add Property</Link> : null}
             <Link to="/dashboard">Dashboard</Link>
             <button onClick={handleLogout} className="button-link">Logout</button>
           </>

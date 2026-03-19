@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children, allowedRole }) {
 
   if (loading) return <div className="center-box">Checking login...</div>
   if (!user) return <Navigate to="/login" replace />
-  if (allowedRole && user.role !== allowedRole) return <Navigate to="/login" replace />
+  if (allowedRole && user.role !== allowedRole) return <Navigate to="/dashboard" replace />
 
   return children
 }
