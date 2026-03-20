@@ -6,6 +6,7 @@ import connectDB, { getDbStatus } from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import seedRoutes from './routes/seedRoutes.js'
+import recommendationRoutes from './routes/recommendationRoutes.js'
 
 dotenv.config()
 
@@ -36,6 +37,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/seed', seedRoutes)
+app.use('/api/recommendations', recommendationRoutes)
 
 connectDB().then(() => {
   app.listen(PORT, () => {

@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import ManagerPropertyList from '../components/property/ManagerPropertyList'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
+import RecommendationSection from '../components/recommendations/RecommendationSection'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -109,11 +110,11 @@ export default function DashboardPage() {
   return (
     <>
       <Navbar />
-      <div className="page-wrap">
+      <div className="page-wrap dashboard-stack">
         <div className="card dashboard-card">
           <p className="badge">Tenant Dashboard</p>
           <h2>Welcome, {user?.name || 'User'}</h2>
-          <p>Your account is active. Explore listings, view property details, and use the search, filter, and sort tools.</p>
+          <p>Your account is active. Explore listings, save favorites, and get smarter recommendations as you browse.</p>
           <div className="info-grid">
             <div><strong>Name:</strong> {user?.name}</div>
             <div><strong>Email:</strong> {user?.email}</div>
@@ -122,8 +123,11 @@ export default function DashboardPage() {
           </div>
           <div className="hero-actions" style={{ marginTop: '24px' }}>
             <Link to="/explore" className="primary-btn">Explore Properties</Link>
+            <Link to="/recommendations" className="secondary-btn">View Recommendations</Link>
           </div>
         </div>
+
+        <RecommendationSection compact />
       </div>
     </>
   )

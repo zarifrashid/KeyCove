@@ -6,6 +6,8 @@ import SearchBar from '../components/search/SearchBar'
 import AdvancedFilters from '../components/search/AdvancedFilters'
 import ActiveFilterChips from '../components/search/ActiveFilterChips'
 import { api, buildMapQuery } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
+import RecommendationSection from '../components/recommendations/RecommendationSection'
 
 const DHAKA_CENTER = [23.8103, 90.4125]
 
@@ -29,6 +31,7 @@ const DEFAULT_FILTERS = {
 }
 
 export default function HomePage() {
+  const { user } = useAuth()
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [stats, setStats] = useState({ totalActive: 0, areaBreakdown: [] })
@@ -189,6 +192,9 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
+      <div className="page-wrap explore-page-stack">
+        {user?.role === 'tenant' ? <RecommendationSection compact /> : null}
+      </div>
       <div className="explore-map-page dual-panel-layout">
         <div className="explore-map-background">
           <PropertyMap
