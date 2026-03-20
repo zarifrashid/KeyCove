@@ -4,6 +4,7 @@ import SearchQuery from '../models/SearchQuery.js'
 import { buildPropertyFilter, extractSearchSnapshot } from '../utils/searchFilters.js'
 import { buildSortOption, normalizeSortOption } from '../utils/searchSort.js'
 import { deleteNeighbourhoodInsightForProperty, generateNeighbourhoodInsightForProperty } from '../services/neighbourhood/insightGenerator.js'
+import { logInteraction } from '../services/recommendations/interactionService.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -195,6 +196,23 @@ async function logSearchQuery({ req, total, page, limit, sortOption, source, zoo
     resultCount: total,
     source
   }).catch(() => null)
+
+  const requesterId = req.user?.userId || getOptionalRequesterId(req)
+  if (requesterId) {
+    await logInteraction({
+      userId: requesterId,
+      interactionType: 'search',
+      source,
+      searchSnapshot: {
+        searchText: snapshot.searchText,
+        area: snapshot.area,
+        filters: snapshot.filters
+      },
+      metadata: {
+        area: snapshot.area || ''
+      }
+    })
+  }
 }
 
 export async function searchProperties(req, res) {
@@ -265,13 +283,23 @@ export async function getPropertyById(req, res) {
       return res.status(404).json({ message: 'Property not found' })
     }
 
+    const requesterId = getOptionalRequesterId(req)
+
     if (property.status !== 'active') {
-      const requesterId = getOptionalRequesterId(req)
       const ownerId = property.manager?._id ? property.manager._id.toString() : property.manager?.toString?.()
 
       if (!requesterId || requesterId !== ownerId) {
         return res.status(404).json({ message: 'Property not found' })
       }
+    }
+
+    if (requesterId) {
+      await logInteraction({
+        userId: requesterId,
+        propertyId: property._id,
+        interactionType: 'property_view',
+        source: 'property-details'
+      })
     }
 
     res.status(200).json({ success: true, property })

@@ -3,8 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import NeighbourhoodInsightsSection from '../components/neighbourhood/NeighbourhoodInsightsSection'
 import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
+import useFavorites from '../hooks/useFavorites'
 
 export default function PropertyDetailsPage() {
+  const { user } = useAuth()
+  const { favoriteIds, saveFavorite } = useFavorites()
   const { id } = useParams()
   const [property, setProperty] = useState(null)
   const [status, setStatus] = useState({ loading: true, error: '' })
@@ -30,6 +34,11 @@ export default function PropertyDetailsPage() {
 
     insightsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showInsights])
+
+  const handleSave = async () => {
+    if (!property) return
+    await saveFavorite(property._id)
+  }
 
   return (
     <>
@@ -68,6 +77,11 @@ export default function PropertyDetailsPage() {
                       >
                         Open in Map
                       </a>
+                      {user?.role === 'tenant' ? (
+                        <button type="button" className="secondary-btn" onClick={handleSave} disabled={favoriteIds.has(property._id)}>
+                          {favoriteIds.has(property._id) ? 'Saved' : 'Save'}
+                        </button>
+                      ) : null}
                       <button type="button" className="secondary-btn" onClick={() => setShowInsights(true)}>
                         Neighbourhood Insights
                       </button>

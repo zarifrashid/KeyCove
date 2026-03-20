@@ -7,6 +7,7 @@ import PropertyDetailsPage from './pages/PropertyDetailsPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
 import AddPropertyPage from './pages/AddPropertyPage'
+import RecommendationsPage from './pages/RecommendationsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -68,6 +69,15 @@ export default function App() {
           <AuthOnlyRoute>
             <LoginPage />
           </AuthOnlyRoute>
+        }
+      />
+
+      <Route
+        path="/recommendations"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RecommendationsPage />
+          </ProtectedRoute>
         }
       />
       <Route
