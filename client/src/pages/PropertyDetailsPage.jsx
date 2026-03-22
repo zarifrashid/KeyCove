@@ -5,6 +5,8 @@ import NeighbourhoodInsightsSection from '../components/neighbourhood/Neighbourh
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import useFavorites from '../hooks/useFavorites'
+import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
+import PropertyMortgageWidget from '../components/mortgage/PropertyMortgageWidget'
 
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
@@ -13,6 +15,7 @@ export default function PropertyDetailsPage() {
   const [property, setProperty] = useState(null)
   const [status, setStatus] = useState({ loading: true, error: '' })
   const [showInsights, setShowInsights] = useState(false)
+  const [affordabilityState, setAffordabilityState] = useState({ loading: false, error: '', summary: null })
   const insightsRef = useRef(null)
 
   useEffect(() => {
@@ -35,6 +38,43 @@ export default function PropertyDetailsPage() {
     insightsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showInsights])
 
+  useEffect(() => {
+    const fetchAffordability = async () => {
+      if (!id || user?.role !== 'tenant') return
+
+      try {
+        setAffordabilityState({ loading: true, error: '', summary: null })
+        const { data } = await api.get(`/affordability/property/${id}`)
+        setAffordabilityState({ loading: false, error: '', summary: data.summary })
+      } catch (error) {
+        setAffordabilityState({
+          loading: false,
+          error: error.response?.data?.message || 'Unable to compare this property yet.',
+          summary: null
+        })
+      }
+    }
+
+    fetchAffordability()
+  }, [id, user?.role])
+
+  const refreshAffordability = async () => {
+    if (user?.role !== 'tenant') return
+
+    try {
+      setAffordabilityState((previous) => ({ ...previous, loading: true, error: '' }))
+      const { data } = await api.get(`/affordability/property/${id}`)
+      setAffordabilityState({ loading: false, error: '', summary: data.summary })
+    } catch (error) {
+      setAffordabilityState({
+        loading: false,
+        error: error.response?.data?.message || 'Unable to compare this property yet.',
+        summary: null
+      })
+    }
+  }
+
+
   const handleSave = async () => {
     if (!property) return
     await saveFavorite(property._id)
@@ -55,7 +95,7 @@ export default function PropertyDetailsPage() {
                   <div className="details-panel">
                     <span className="badge">{property.propertyType}</span>
                     <h1>{property.title}</h1>
-                    <p className="details-price">৳ {property.price.toLocaleString()} / month</p>
+                    <p className="details-price">৳ {property.price.toLocaleString()}{property.listingType === 'rent' ? ' / month' : ''}</p>
                     <p>{property.description}</p>
                     <div className="info-grid">
                       <div><strong>Address:</strong> {property.location.address}, {property.location.area}, {property.location.city}</div>
@@ -67,6 +107,15 @@ export default function PropertyDetailsPage() {
                       <div><strong>Map Coordinates:</strong> {property.location.latitude}, {property.location.longitude}</div>
                       <div><strong>Amenities:</strong> {property.amenities?.join(', ')}</div>
                     </div>
+                    {user?.role === 'tenant' ? (
+                      <PropertyAffordabilityWidget
+                        summary={affordabilityState.summary}
+                        loading={affordabilityState.loading}
+                        error={affordabilityState.error}
+                        onRefresh={refreshAffordability}
+                      />
+                    ) : null}
+                    <PropertyMortgageWidget property={property} />
                     <div className="hero-actions">
                       <Link to="/explore" className="secondary-btn">Back to Map</Link>
                       <a

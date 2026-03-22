@@ -7,6 +7,8 @@ import authRoutes from './routes/authRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import seedRoutes from './routes/seedRoutes.js'
 import recommendationRoutes from './routes/recommendationRoutes.js'
+import affordabilityRoutes from './routes/affordabilityRoutes.js'
+import mortgageRoutes from './routes/mortgageRoutes.js'
 
 dotenv.config()
 
@@ -38,6 +40,8 @@ app.use('/api/auth', authRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/seed', seedRoutes)
 app.use('/api/recommendations', recommendationRoutes)
+app.use('/api/affordability', affordabilityRoutes)
+app.use('/api/mortgage', mortgageRoutes)
 
 connectDB().then(() => {
   app.listen(PORT, () => {

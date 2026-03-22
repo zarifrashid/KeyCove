@@ -2272,3 +2272,319 @@ body {
 .ghost-btn {
   background: #fff;
 }
+
+
+.affordability-page-wrap {
+  align-items: start;
+  min-height: auto;
+}
+
+.affordability-page-shell {
+  width: min(1100px, 100%);
+  display: grid;
+  gap: 20px;
+}
+
+.affordability-form-card,
+.affordability-result-card,
+.affordability-history-card {
+  display: grid;
+  gap: 18px;
+}
+
+.section-heading-row,
+.affordability-result-header,
+.affordability-widget-topline,
+.compact-heading-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.affordability-form-grid,
+.affordability-metric-grid,
+.affordability-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.affordability-form-grid label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  color: #314355;
+}
+
+.affordability-form-grid input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #d8e3f0;
+  font-size: 15px;
+}
+
+.affordability-explainer-box,
+.property-affordability-widget,
+.affordability-filter-note {
+  background: #f8fbff;
+  border: 1px solid #e1ebf7;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.affordability-status-chip,
+.affordability-inline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #e9f2fb;
+  color: #0f4c81;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.affordability-pill-safe,
+.affordability-inline-pill.affordable {
+  background: #e9f8f0;
+  color: #127148;
+}
+
+.affordability-pill-borderline,
+.affordability-inline-pill.borderline {
+  background: #fff5dd;
+  color: #8a6700;
+}
+
+.affordability-pill-stretched,
+.affordability-inline-pill.stretched {
+  background: #fff0e7;
+  color: #b85b00;
+}
+
+.affordability-pill-unsafe,
+.affordability-inline-pill.unaffordable {
+  background: #ffeaea;
+  color: #b23a2f;
+}
+
+.affordability-history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.affordability-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid #e7edf5;
+  background: #fff;
+}
+
+.affordability-banner-card {
+  width: min(1200px, 100%);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.affordability-banner-actions {
+  margin-top: 0;
+}
+
+.muted-text {
+  color: #5d6d7e;
+}
+
+.affordability-flash-text {
+  width: min(1100px, 100%);
+  margin: 0;
+}
+
+.property-affordability-widget {
+  margin: 18px 0;
+  display: grid;
+  gap: 16px;
+}
+
+.affordability-widget-body {
+  display: grid;
+  gap: 14px;
+}
+
+.affordability-widget-grid div {
+  display: grid;
+  gap: 4px;
+}
+
+.affordability-widget-grid span,
+.affordability-filter-note span {
+  color: #5d6d7e;
+}
+
+.left-aligned-state {
+  text-align: left;
+  justify-items: start;
+}
+
+.property-card-title-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.affordability-filter-note {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .affordability-banner-card,
+  .section-heading-row,
+  .affordability-result-header,
+  .compact-heading-row,
+  .affordability-history-item,
+  .affordability-widget-topline {
+    flex-direction: column;
+  }
+}
+
+.mortgage-page-shell {
+  gap: 1.25rem;
+}
+
+.mortgage-form-card,
+.mortgage-result-card,
+.mortgage-breakdown-card,
+.mortgage-history-card {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.mortgage-form-grid,
+.mortgage-metric-grid,
+.mortgage-detail-grid,
+.mortgage-dual-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.mortgage-form-grid,
+.mortgage-metric-grid,
+.mortgage-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.mortgage-dual-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.mortgage-form-grid label,
+.mortgage-metric-grid div,
+.mortgage-detail-grid div,
+.mortgage-inline-summary div {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mortgage-form-grid input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  font: inherit;
+}
+
+.mortgage-form-grid span,
+.mortgage-metric-grid span,
+.mortgage-detail-grid span,
+.mortgage-inline-summary span,
+.mortgage-breakdown-list span,
+.mortgage-history-item span {
+  color: var(--muted-text);
+}
+
+.mortgage-inline-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+}
+
+.mortgage-result-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.mortgage-metric-grid div,
+.mortgage-breakdown-list > div {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.mortgage-breakdown-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.mortgage-breakdown-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.mortgage-total-highlight {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.mortgage-actions-row {
+  flex-wrap: wrap;
+}
+
+.mortgage-property-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.mortgage-rental-note {
+  margin-top: 1rem;
+}
+
+.mortgage-history-item {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mortgage-history-item p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-text);
+}
+
+@media (max-width: 720px) {
+  .mortgage-result-header,
+  .mortgage-breakdown-list > div {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
