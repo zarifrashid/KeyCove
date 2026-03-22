@@ -31,12 +31,14 @@ function calculateRange(values = []) {
 function buildSummary(preference) {
   const area = preference.preferredAreas?.[0]?.value
   const type = preference.preferredPropertyTypes?.[0]?.value
-  const avgBudget = preference.preferredPriceRange?.average
+  //const avgBudget = preference.preferredPriceRange?.average
+  const avgBudget = null
 
   return [
     area ? `Top area: ${area}` : null,
     type ? `Top type: ${type}` : null,
     avgBudget ? `Typical budget: ৳${avgBudget.toLocaleString()}` : null
+    
   ].filter(Boolean).join(' • ')
 }
 

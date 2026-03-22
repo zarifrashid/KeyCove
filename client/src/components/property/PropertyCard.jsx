@@ -9,7 +9,10 @@ export default function PropertyCard({ property, isActive, onSelect, compact = f
           <span className="property-type-chip">{property.propertyType}</span>
           <strong>৳ {property.price.toLocaleString()}</strong>
         </div>
-        <h3>{property.title}</h3>
+        <div className="property-card-title-row">
+          <h3>{property.title}</h3>
+          {property.affordabilityLabel ? <span className={`affordability-inline-pill ${property.affordabilityCategory || ''}`}>{property.affordabilityLabel}</span> : null}
+        </div>
         <p className="property-location">{property.location.address}, {property.location.area}, {property.location.city}</p>
         <p className="property-summary">{property.bedrooms} bed • {property.bathrooms} bath • {property.squareFeet} sqft • {property.listingType}</p>
         <div className="amenity-preview-row">
