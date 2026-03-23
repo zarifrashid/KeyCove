@@ -30,7 +30,7 @@ function MapUpdater({ center, zoom, onBoundsChange }) {
     }
 
     map.on('moveend', handleMoveEnd)
-    handleMoveEnd()
+    /*handleMoveEnd()*/
 
     return () => {
       map.off('moveend', handleMoveEnd)

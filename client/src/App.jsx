@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
 import AddPropertyPage from './pages/AddPropertyPage'
 import RecommendationsPage from './pages/RecommendationsPage'
+import AffordabilityPage from './pages/AffordabilityPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -72,6 +73,15 @@ export default function App() {
         }
       />
 
+
+      <Route
+        path="/affordability"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <AffordabilityPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/recommendations"
         element={

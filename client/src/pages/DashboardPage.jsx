@@ -123,6 +123,7 @@ export default function DashboardPage() {
           </div>
           <div className="hero-actions" style={{ marginTop: '24px' }}>
             <Link to="/explore" className="primary-btn">Explore Properties</Link>
+            <Link to="/affordability" className="secondary-btn">Affordability Analyzer</Link>
             <Link to="/recommendations" className="secondary-btn">View Recommendations</Link>
           </div>
         </div>
