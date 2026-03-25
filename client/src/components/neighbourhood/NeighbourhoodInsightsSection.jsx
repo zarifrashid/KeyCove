@@ -272,7 +272,7 @@ export default function NeighbourhoodInsightsSection({ property }) {
     <section className="card neighbourhood-card" id="neighbourhood-insights-section">
       <div className="neighbourhood-card-header">
         <div>
-          <p className="badge">Feature 4</p>
+          
           <h2>Neighbourhood Insights</h2>
           <p>
             Local context for this property in {property.location?.area || 'Dhaka'} including walkability, schools,
