@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 const PROPERTY_OPTIONS = ['Apartment', 'Condo', 'Studio', 'Family Home']
 const LISTING_OPTIONS = [
@@ -37,10 +37,18 @@ export default function PropertyForm({
   onAmenityToggle,
   onAmenitiesInput,
   onSubmit,
-  onCancel
+  onCancel,
+  onCoverImageUrlChange,
+  onFilesSelected,
+  onRemoveImage,
+  onMoveImage,
+  onSetCover,
+  onAddImageUrl
 }) {
-  const imagePreview = form.image || form.images || ''
   const amenitiesText = useMemo(() => form.amenities.join(', '), [form.amenities])
+  const galleryImages = Array.isArray(form.galleryImages) ? form.galleryImages : []
+  const coverPreview = galleryImages[0]?.previewUrl || galleryImages[0]?.url || ''
+  const [manualGalleryUrl, setManualGalleryUrl] = useState('')
 
   return (
     <form
@@ -123,7 +131,7 @@ export default function PropertyForm({
             placeholder="90.4125"
           />
         </Field>
-        <Field label="Type">
+        <Field label="Sale / Rent">
           <select value={form.listingType} onChange={(event) => onChange('listingType', event.target.value)}>
             {LISTING_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
@@ -133,7 +141,7 @@ export default function PropertyForm({
       </div>
 
       <div className="property-grid three-col">
-        <Field label="Property">
+        <Field label="Property Type">
           <select value={form.propertyType} onChange={(event) => onChange('propertyType', event.target.value)}>
             {PROPERTY_OPTIONS.map((option) => (
               <option key={option} value={option}>{option}</option>
@@ -194,17 +202,91 @@ export default function PropertyForm({
 
       <div className="property-grid two-col property-bottom-grid">
         <div className="property-side-panel">
-          <Field label="Cover Image URL">
-            <input value={form.image} onChange={(event) => onChange('image', event.target.value)} placeholder="https://..." />
-          </Field>
-          <Field label="Additional Image URLs (comma separated)">
-            <textarea
-              className="property-small-textarea"
-              value={form.images}
-              onChange={(event) => onChange('images', event.target.value)}
-              placeholder="https://image1, https://image2"
-            />
-          </Field>
+          <div className="property-image-manager">
+            <div className="property-image-manager-header">
+              <div>
+                <span className="property-image-title"> Upload Image </span>
+                <p>Upto 6 images</p>
+              </div>
+              <span className="property-image-counter">{galleryImages.length}/6 images</span>
+            </div>
+
+            <div className="property-image-upload-grid">
+              <label className="upload-panel-card">
+                <strong>Cover Image</strong>
+                
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => onFilesSelected(event.target.files, 'cover')}
+                />
+              </label>
+
+              <label className="upload-panel-card">
+                <strong>Additional Images</strong>
+                
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(event) => onFilesSelected(event.target.files, 'gallery')}
+                />
+              </label>
+            </div>
+
+            <Field label="Cover Image URL (fallback)">
+              <input
+                value={form.image}
+                onChange={(event) => onCoverImageUrlChange(event.target.value)}
+                placeholder="https://..."
+              />
+            </Field>
+
+            <div className="property-inline-url-row">
+              <input
+                value={manualGalleryUrl}
+                onChange={(event) => setManualGalleryUrl(event.target.value)}
+                placeholder="Add an extra image URL"
+              />
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => {
+                  onAddImageUrl(manualGalleryUrl, 'gallery')
+                  setManualGalleryUrl('')
+                }}
+              >
+                Add URL
+              </button>
+            </div>
+
+            <div className="property-gallery-grid">
+              {galleryImages.length ? galleryImages.map((item, index) => (
+                <article key={item.id} className={`property-gallery-card ${index === 0 ? 'cover-card' : ''}`}>
+                  <div className="property-gallery-preview-wrap">
+                    <img src={item.previewUrl || item.url} alt={`Property ${index + 1}`} className="property-gallery-preview" />
+                    <div className="property-gallery-badges">
+                      {index === 0 ? <span className="badge success-badge">Cover</span> : null}
+                      <span className="badge neutral-badge">#{index + 1}</span>
+                    </div>
+                  </div>
+                  <div className="property-gallery-meta">
+                    <strong>{item.file?.name || item.url || `Image ${index + 1}`}</strong>
+                    <small>{item.file ? 'Ready to upload on submit' : 'Stored URL'}</small>
+                  </div>
+                  <div className="property-gallery-actions">
+                    <button type="button" className="secondary-btn compact-btn" onClick={() => onMoveImage(item.id, 'left')} disabled={index === 0}>←</button>
+                    <button type="button" className="secondary-btn compact-btn" onClick={() => onMoveImage(item.id, 'right')} disabled={index === galleryImages.length - 1}>→</button>
+                    <button type="button" className="secondary-btn compact-btn" onClick={() => onSetCover(item.id)} disabled={index === 0}>Set Cover</button>
+                    <button type="button" className="danger-btn compact-btn" onClick={() => onRemoveImage(item.id)}>Remove</button>
+                  </div>
+                </article>
+              )) : (
+                <div className="property-preview-placeholder">Upload a cover image and up to 5 more gallery images. You can also add image URLs manually.</div>
+              )}
+            </div>
+          </div>
+
           <Field label="Postal Code">
             <input
               value={form.location.postalCode}
@@ -247,11 +329,11 @@ export default function PropertyForm({
           </div>
 
           <div className="property-preview-card">
-            <span>Image Preview</span>
-            {imagePreview ? (
-              <img src={imagePreview.split(',')[0].trim()} alt="Property preview" className="property-preview-image" />
+            <span>Cover Preview</span>
+            {coverPreview ? (
+              <img src={coverPreview} alt="Property preview" className="property-preview-image" />
             ) : (
-              <div className="property-preview-placeholder">Add an image URL to preview the property cover.</div>
+              <div className="property-preview-placeholder">Add an image URL or upload a photo to preview the property cover.</div>
             )}
           </div>
         </div>

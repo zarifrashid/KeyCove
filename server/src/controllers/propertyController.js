@@ -12,6 +12,7 @@ const DHAKA_CENTER = {
 }
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
+const MAX_PROPERTY_IMAGES = 6
 
 function parseNumber(value, fallback) {
   const parsed = Number(value)
@@ -44,29 +45,67 @@ function normalizeAmenities(value) {
   return []
 }
 
-function normalizeImages(value) {
+function dedupeImageList(items = []) {
+  const seen = new Set()
+  return items.filter((item) => {
+    if (!item?.url || seen.has(item.url)) return false
+    seen.add(item.url)
+    return true
+  })
+}
+
+function normalizeImages(value, coverImage = '') {
+  const nextItems = []
+
   if (Array.isArray(value)) {
-    return value
-      .map((item, index) => {
-        const url = typeof item === 'string' ? item.trim() : String(item?.url || '').trim()
-        if (!url) return null
-        return {
+    value.forEach((item, index) => {
+      const url = typeof item === 'string' ? item.trim() : normalizeString(item?.url)
+      if (!url) return
+      nextItems.push({
+        url,
+        sortOrder: parseOptionalNumber(item?.sortOrder, index) ?? index,
+        isCover: Boolean(item?.isCover),
+        source: normalizeString(item?.source, 'url') || 'url',
+        uploadedAt: item?.uploadedAt ? new Date(item.uploadedAt) : new Date()
+      })
+    })
+  } else if (typeof value === 'string') {
+    value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .forEach((url, index) => {
+        nextItems.push({
           url,
           sortOrder: index,
+          isCover: false,
+          source: 'url',
           uploadedAt: new Date()
-        }
+        })
       })
-      .filter(Boolean)
   }
 
-  if (typeof value === 'string') {
-    return value
-      .split(',')
-      .map((item, index) => item.trim() ? ({ url: item.trim(), sortOrder: index, uploadedAt: new Date() }) : null)
-      .filter(Boolean)
+  const cover = normalizeString(coverImage)
+  if (cover) {
+    nextItems.unshift({
+      url: cover,
+      sortOrder: -1,
+      isCover: true,
+      source: 'url',
+      uploadedAt: new Date()
+    })
   }
 
-  return []
+  return dedupeImageList(nextItems)
+    .sort((first, second) => (first.sortOrder ?? 0) - (second.sortOrder ?? 0))
+    .slice(0, MAX_PROPERTY_IMAGES)
+    .map((item, index) => ({
+      url: item.url,
+      sortOrder: index,
+      isCover: index === 0,
+      source: item.source || 'url',
+      uploadedAt: item.uploadedAt || new Date()
+    }))
 }
 
 function buildGeoLocation(latitude, longitude) {
@@ -102,8 +141,12 @@ function validatePublishedProperty(payload) {
   const price = parseOptionalNumber(payload.price)
   if (price === null || price <= 0) errors.push('Price must be greater than 0 to publish.')
 
-  const image = normalizeString(payload.image)
-  if (!image) errors.push('Cover image URL is required to publish.')
+  const image = normalizeString(payload.image) || normalizeString(payload.images?.[0]?.url)
+  if (!image) errors.push('At least one property image is required to publish.')
+
+  if (Array.isArray(payload.images) && payload.images.length > MAX_PROPERTY_IMAGES) {
+    errors.push(`You can store up to ${MAX_PROPERTY_IMAGES} property images only.`)
+  }
 
   const bedrooms = parseOptionalNumber(payload.bedrooms)
   if (bedrooms === null || bedrooms < 0) errors.push('Bedroom number must be 0 or more.')
@@ -133,8 +176,8 @@ function extractBody(req) {
 
 function buildPropertyPayload(payload, currentProperty = null, managerId) {
   const location = buildLocation(payload.location, currentProperty?.location || {})
-  const nextImages = normalizeImages(payload.images)
-  const nextImage = normalizeString(payload.image, currentProperty?.image || '') || nextImages[0]?.url || FALLBACK_IMAGE
+  const nextImages = normalizeImages(payload.images, payload.image || currentProperty?.image || '')
+  const nextImage = nextImages[0]?.url || normalizeString(payload.image, currentProperty?.image || '') || FALLBACK_IMAGE
   const action = normalizeString(payload.action, currentProperty?.status === 'active' ? 'publish' : 'draft').toLowerCase()
   const shouldPublish = action === 'publish'
 
@@ -151,7 +194,7 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
     availableFrom: payload.availableFrom ? new Date(payload.availableFrom) : currentProperty?.availableFrom || new Date(),
     image: nextImage,
     imageAlt: normalizeString(payload.imageAlt, payload.title || currentProperty?.imageAlt || 'Property photo') || 'Property photo',
-    images: nextImages.length ? nextImages : currentProperty?.images || (nextImage ? [{ url: nextImage, sortOrder: 0, uploadedAt: new Date() }] : []),
+    images: nextImages.length ? nextImages : (nextImage ? [{ url: nextImage, sortOrder: 0, isCover: true, source: 'url', uploadedAt: new Date() }] : []),
     manager: managerId,
     amenities: normalizeAmenities(payload.amenities),
     policies: {
@@ -168,7 +211,6 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
     geoLocation: buildGeoLocation(location.latitude, location.longitude)
   }
 }
-
 
 async function syncNeighbourhoodInsight(property) {
   if (!property || property.status !== 'active') return

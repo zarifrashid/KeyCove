@@ -8,9 +8,14 @@ import propertyRoutes from './routes/propertyRoutes.js'
 import seedRoutes from './routes/seedRoutes.js'
 import recommendationRoutes from './routes/recommendationRoutes.js'
 import affordabilityRoutes from './routes/affordabilityRoutes.js'
+import uploadRoutes from './routes/uploadRoutes.js'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 dotenv.config()
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const app = express()
 const PORT = process.env.PORT || 5000
 
@@ -18,7 +23,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }))
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
 app.use(cookieParser())
 
 app.get('/api/test', (req, res) => {
@@ -40,6 +45,8 @@ app.use('/api/properties', propertyRoutes)
 app.use('/api/seed', seedRoutes)
 app.use('/api/recommendations', recommendationRoutes)
 app.use('/api/affordability', affordabilityRoutes)
+app.use('/api/uploads', uploadRoutes)
+app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
 connectDB().then(() => {
   app.listen(PORT, () => {
