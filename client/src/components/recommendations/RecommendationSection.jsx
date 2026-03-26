@@ -7,7 +7,11 @@ import RecommendationCard from './RecommendationCard'
 
 export default function RecommendationSection({ compact = false }) {
   const { user } = useAuth()
+<<<<<<< HEAD
   const { favoriteIds, toggleFavorite, pendingPropertyIds } = useFavorites()
+=======
+  const { favoriteIds, saveFavorite } = useFavorites()
+>>>>>>> origin/main
   const [state, setState] = useState({ loading: user?.role === 'tenant', error: '', items: [], summary: '' })
 
   useEffect(() => {
@@ -34,7 +38,11 @@ export default function RecommendationSection({ compact = false }) {
   if (user?.role !== 'tenant') return null
 
   const handleSave = async (item) => {
+<<<<<<< HEAD
     await toggleFavorite(item.property._id, item.recommendationId)
+=======
+    await saveFavorite(item.property._id, item.recommendationId)
+>>>>>>> origin/main
   }
 
   const handleTrackClick = async (item) => {
@@ -80,7 +88,10 @@ export default function RecommendationSection({ compact = false }) {
             onSave={handleSave}
             onNotInterested={handleNotInterested}
             onTrackClick={handleTrackClick}
+<<<<<<< HEAD
             isSaving={pendingPropertyIds.has(item.property._id)}
+=======
+>>>>>>> origin/main
           />
         ))}
       </div>

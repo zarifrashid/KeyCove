@@ -5,12 +5,18 @@ import ManagerPropertyList from '../components/property/ManagerPropertyList'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
+<<<<<<< HEAD
 import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
 import useFavorites from '../hooks/useFavorites'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const { favorites, favoriteIds, toggleFavorite, pendingPropertyIds, loading: favoritesLoading } = useFavorites()
+=======
+
+export default function DashboardPage() {
+  const { user } = useAuth()
+>>>>>>> origin/main
   const location = useLocation()
   const [managerState, setManagerState] = useState({ loading: user?.role === 'manager', deletingId: '', error: '', properties: [] })
   const [flashMessage, setFlashMessage] = useState(location.state?.flashMessage || '')
@@ -131,6 +137,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
 
         {user?.role === 'tenant' ? (
           favoritesLoading ? (
@@ -153,6 +160,8 @@ export default function DashboardPage() {
           )
         ) : null}
 
+=======
+>>>>>>> origin/main
         <RecommendationSection compact />
       </div>
     </>

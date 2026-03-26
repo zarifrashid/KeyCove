@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+<<<<<<< HEAD
 import { useAuth } from '../../context/AuthContext'
 import BookmarkButton from '../bookmarks/BookmarkButton'
 
@@ -20,6 +21,10 @@ export default function PropertyCard({
     await onToggleFavorite(property._id)
   }
 
+=======
+
+export default function PropertyCard({ property, isActive, onSelect, compact = false }) {
+>>>>>>> origin/main
   return (
     <article className={`property-card ${compact ? 'compact' : ''} ${isActive ? 'active' : ''}`} onClick={() => onSelect(property)}>
       <img className="property-card-image" src={property.image} alt={property.imageAlt} />
@@ -46,6 +51,7 @@ export default function PropertyCard({
           <Link to={`/properties/${property._id}`} className="primary-btn" onClick={(event) => event.stopPropagation()}>
             View Details
           </Link>
+<<<<<<< HEAD
           {isTenant ? (
             <BookmarkButton
               isSaved={isSaved}
@@ -54,6 +60,8 @@ export default function PropertyCard({
               compact={compact}
             />
           ) : null}
+=======
+>>>>>>> origin/main
         </div>
       </div>
     </article>

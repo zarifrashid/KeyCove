@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 
+<<<<<<< HEAD
 function getTokenFromRequest(req) {
   const cookieToken = req.cookies?.token
   if (cookieToken) return cookieToken
@@ -15,6 +16,10 @@ function getTokenFromRequest(req) {
 
 export async function protect(req, res, next) {
   const token = getTokenFromRequest(req)
+=======
+export async function protect(req, res, next) {
+  const token = req.cookies.token
+>>>>>>> origin/main
 
   if (!token) {
     return res.status(401).json({ message: 'Not authorized' })

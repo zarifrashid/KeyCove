@@ -5,7 +5,10 @@ import NeighbourhoodInsightsSection from '../components/neighbourhood/Neighbourh
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import useFavorites from '../hooks/useFavorites'
+<<<<<<< HEAD
 import BookmarkButton from '../components/bookmarks/BookmarkButton'
+=======
+>>>>>>> origin/main
 import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
 
 const AMENITY_ICON_MAP = {
@@ -98,7 +101,11 @@ function DetailsRow({ label, value }) {
 
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
+<<<<<<< HEAD
   const { favoriteIds, toggleFavorite, pendingPropertyIds } = useFavorites()
+=======
+  const { favoriteIds, saveFavorite } = useFavorites()
+>>>>>>> origin/main
   const { id } = useParams()
   const [property, setProperty] = useState(null)
   const [status, setStatus] = useState({ loading: true, error: '' })
@@ -188,7 +195,11 @@ export default function PropertyDetailsPage() {
 
   const handleSave = async () => {
     if (!property) return
+<<<<<<< HEAD
     await toggleFavorite(property._id)
+=======
+    await saveFavorite(property._id)
+>>>>>>> origin/main
   }
 
   const openInsights = () => setShowInsights(true)
@@ -251,11 +262,17 @@ export default function PropertyDetailsPage() {
                       </a>
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
+<<<<<<< HEAD
                         <BookmarkButton
                           isSaved={favoriteIds.has(property._id)}
                           onToggle={handleSave}
                           loading={pendingPropertyIds.has(property._id)}
                         />
+=======
+                        <button type="button" className="secondary-btn" onClick={handleSave} disabled={favoriteIds.has(property._id)}>
+                          {favoriteIds.has(property._id) ? 'Saved' : 'Save'}
+                        </button>
+>>>>>>> origin/main
                       ) : null}
                     </div>
                   </div>

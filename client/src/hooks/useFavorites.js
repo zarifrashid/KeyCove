@@ -2,12 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 
+<<<<<<< HEAD
 const FAVORITES_UPDATED_EVENT = 'keycove:favorites-updated'
 
+=======
+>>>>>>> origin/main
 export default function useFavorites() {
   const { user } = useAuth()
   const [favorites, setFavorites] = useState([])
   const [loading, setLoading] = useState(Boolean(user && user.role === 'tenant'))
+<<<<<<< HEAD
   const [pendingPropertyIds, setPendingPropertyIds] = useState(() => new Set())
 
   const favoriteIds = useMemo(
@@ -24,12 +28,21 @@ export default function useFavorites() {
   const refreshFavorites = useCallback(async () => {
     if (!isTenant) {
       syncFavorites([])
+=======
+
+  const favoriteIds = useMemo(() => new Set(favorites.map((item) => item.property?._id || item.property)), [favorites])
+
+  const refreshFavorites = useCallback(async () => {
+    if (!user || user.role !== 'tenant') {
+      setFavorites([])
+>>>>>>> origin/main
       setLoading(false)
       return
     }
 
     try {
       setLoading(true)
+<<<<<<< HEAD
       const { data } = await api.get('/bookmarks')
       syncFavorites(data.favorites || [])
     } catch (_) {
@@ -38,11 +51,22 @@ export default function useFavorites() {
       setLoading(false)
     }
   }, [isTenant, syncFavorites])
+=======
+      const { data } = await api.get('/recommendations/favorites')
+      setFavorites(data.favorites || [])
+    } catch (_) {
+      setFavorites([])
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+>>>>>>> origin/main
 
   useEffect(() => {
     refreshFavorites()
   }, [refreshFavorites])
 
+<<<<<<< HEAD
   useEffect(() => {
     const handleExternalUpdate = () => {
       refreshFavorites()
@@ -121,10 +145,24 @@ export default function useFavorites() {
   }, [favoriteIds, removeFavorite, saveFavorite])
 
   const isFavorite = useCallback((propertyId) => favoriteIds.has(String(propertyId)), [favoriteIds])
+=======
+  const saveFavorite = useCallback(async (propertyId, recommendationId = null) => {
+    const { data } = await api.post('/recommendations/favorites', { propertyId, recommendationId })
+    await refreshFavorites()
+    return data
+  }, [refreshFavorites])
+
+  const removeFavorite = useCallback(async (propertyId) => {
+    const { data } = await api.delete(`/recommendations/favorites/${propertyId}`)
+    await refreshFavorites()
+    return data
+  }, [refreshFavorites])
+>>>>>>> origin/main
 
   return {
     favorites,
     favoriteIds,
+<<<<<<< HEAD
     pendingPropertyIds,
     loading,
     isFavorite,
@@ -132,5 +170,11 @@ export default function useFavorites() {
     saveFavorite,
     removeFavorite,
     toggleFavorite
+=======
+    loading,
+    refreshFavorites,
+    saveFavorite,
+    removeFavorite
+>>>>>>> origin/main
   }
 }

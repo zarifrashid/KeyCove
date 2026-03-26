@@ -1,4 +1,5 @@
 import PropertyCard from './PropertyCard'
+<<<<<<< HEAD
 import useFavorites from '../../hooks/useFavorites'
 import { useAuth } from '../../context/AuthContext'
 
@@ -6,6 +7,10 @@ export default function PropertyList({ properties, selectedPropertyId, onSelectP
   const { user } = useAuth()
   const { favoriteIds, toggleFavorite, pendingPropertyIds } = useFavorites()
 
+=======
+
+export default function PropertyList({ properties, selectedPropertyId, onSelectProperty, compact = false, emptyTitle = 'No properties found', emptyText = 'Try another search, adjust filters, or move the map.' }) {
+>>>>>>> origin/main
   if (!properties.length) {
     return (
       <div className="empty-state compact-empty-state">
@@ -24,9 +29,12 @@ export default function PropertyList({ properties, selectedPropertyId, onSelectP
           isActive={selectedPropertyId === property._id}
           onSelect={onSelectProperty}
           compact={compact}
+<<<<<<< HEAD
           isSaved={user?.role === 'tenant' && favoriteIds.has(property._id)}
           isSaving={pendingPropertyIds.has(property._id)}
           onToggleFavorite={toggleFavorite}
+=======
+>>>>>>> origin/main
         />
       ))}
     </div>

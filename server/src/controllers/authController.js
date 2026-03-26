@@ -18,7 +18,10 @@ function sendTokenResponse(res, user) {
 
   res.status(200).json({
     message: 'Success',
+<<<<<<< HEAD
     token,
+=======
+>>>>>>> origin/main
     user: {
       id: user._id,
       name: user.name,

@@ -7,7 +7,10 @@ import authRoutes from './routes/authRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import seedRoutes from './routes/seedRoutes.js'
 import recommendationRoutes from './routes/recommendationRoutes.js'
+<<<<<<< HEAD
 import bookmarkRoutes from './routes/bookmarkRoutes.js'
+=======
+>>>>>>> origin/main
 import affordabilityRoutes from './routes/affordabilityRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import path from 'path'
@@ -45,7 +48,10 @@ app.use('/api/auth', authRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/seed', seedRoutes)
 app.use('/api/recommendations', recommendationRoutes)
+<<<<<<< HEAD
 app.use('/api/bookmarks', bookmarkRoutes)
+=======
+>>>>>>> origin/main
 app.use('/api/affordability', affordabilityRoutes)
 app.use('/api/uploads', uploadRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
