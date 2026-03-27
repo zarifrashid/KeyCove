@@ -1,8 +1,29 @@
 import { Link } from 'react-router-dom'
+import BookmarkButton from '../bookmarks/BookmarkButton'
 
-export default function PropertyCard({ property, isActive, onSelect, compact = false }) {
+export default function PropertyCard({
+  property,
+  isActive,
+  onSelect,
+  compact = false,
+  isSaved = false,
+  onToggleFavorite = null,
+  bookmarkBusy = false,
+  bookmarkSavedLabel = 'Saved'
+}) {
+  const handleSelect = () => {
+    if (typeof onSelect === 'function') {
+      onSelect(property)
+    }
+  }
+
+  const handleToggleFavorite = (event) => {
+    event.stopPropagation()
+    onToggleFavorite?.(property._id)
+  }
+
   return (
-    <article className={`property-card ${compact ? 'compact' : ''} ${isActive ? 'active' : ''}`} onClick={() => onSelect(property)}>
+    <article className={`property-card ${compact ? 'compact' : ''} ${isActive ? 'active' : ''}`} onClick={handleSelect}>
       <img className="property-card-image" src={property.image} alt={property.imageAlt} />
       <div className="property-card-body">
         <div className="property-card-topline">
@@ -21,9 +42,17 @@ export default function PropertyCard({ property, isActive, onSelect, compact = f
           ))}
         </div>
         <div className="property-card-actions compact-actions">
-          <button type="button" className="secondary-btn" onClick={(event) => { event.stopPropagation(); onSelect(property) }}>
+          <button type="button" className="secondary-btn" onClick={(event) => { event.stopPropagation(); handleSelect() }}>
             Open in Map
           </button>
+          {onToggleFavorite ? (
+            <BookmarkButton
+              isSaved={isSaved}
+              onToggle={handleToggleFavorite}
+              busy={bookmarkBusy}
+              savedLabel={bookmarkSavedLabel}
+            />
+          ) : null}
           <Link to={`/properties/${property._id}`} className="primary-btn" onClick={(event) => event.stopPropagation()}>
             View Details
           </Link>

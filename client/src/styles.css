@@ -2863,3 +2863,52 @@ body {
     top: -60px;
   }
 }
+
+
+.bookmark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bookmark-btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.bookmark-btn.is-saved {
+  background: #0f4c81;
+  color: #fff;
+}
+
+.saved-properties-section {
+  display: grid;
+  gap: 18px;
+}
+
+.saved-properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.saved-properties-count-pill {
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #eef5fd;
+  color: #0f4c81;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.saved-properties-empty-state {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .saved-properties-header {
+    flex-direction: column;
+  }
+}

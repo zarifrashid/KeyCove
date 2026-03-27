@@ -10,6 +10,7 @@ import { api, buildMapQuery } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
 import AffordabilityActiveBanner from '../components/affordability/AffordabilityActiveBanner'
+import useFavorites from '../hooks/useFavorites'
 
 const DHAKA_CENTER = [23.8103, 90.4125]
 
@@ -58,6 +59,8 @@ export default function HomePage() {
   const [isSearchOpen, setIsSearchOpen] = useState(true)
   const [isResultsOpen, setIsResultsOpen] = useState(true)
   const debounceRef = useRef(null)
+  const { favoriteIds, toggleFavorite } = useFavorites()
+  const [bookmarkBusyId, setBookmarkBusyId] = useState('')
 
   const fetchLatestAffordability = async () => {
     if (user?.role !== 'tenant') return
@@ -283,6 +286,15 @@ export default function HomePage() {
     setSearchParams({})
   }
 
+  const handleToggleFavorite = async (propertyId) => {
+    try {
+      setBookmarkBusyId(propertyId)
+      await toggleFavorite(propertyId)
+    } finally {
+      setBookmarkBusyId('')
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -392,6 +404,9 @@ export default function HomePage() {
                   selectedPropertyId={selectedProperty?._id}
                   onSelectProperty={setSelectedProperty}
                   compact
+                  favoriteIds={favoriteIds}
+                  onToggleFavorite={user?.role === 'tenant' ? handleToggleFavorite : null}
+                  bookmarkBusyId={bookmarkBusyId}
                   emptyTitle={affordabilityFilterActive ? 'No current listings match your affordability range' : 'No properties found'}
                   emptyText={affordabilityFilterActive ? 'Try updating your affordability profile or clear the affordability filter to explore more rentals.' : 'Try another search, adjust filters, or move the map.'}
                 />

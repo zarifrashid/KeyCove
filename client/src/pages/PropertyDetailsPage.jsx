@@ -97,7 +97,7 @@ function DetailsRow({ label, value }) {
 
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
-  const { favoriteIds, saveFavorite } = useFavorites()
+  const { favoriteIds, toggleFavorite } = useFavorites()
   const { id } = useParams()
   const [property, setProperty] = useState(null)
   const [status, setStatus] = useState({ loading: true, error: '' })
@@ -187,7 +187,7 @@ export default function PropertyDetailsPage() {
 
   const handleSave = async () => {
     if (!property) return
-    await saveFavorite(property._id)
+    await toggleFavorite(property._id)
   }
 
   const openInsights = () => setShowInsights(true)
@@ -250,8 +250,9 @@ export default function PropertyDetailsPage() {
                       </a>
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
-                        <button type="button" className="secondary-btn" onClick={handleSave} disabled={favoriteIds.has(property._id)}>
-                          {favoriteIds.has(property._id) ? 'Saved' : 'Save'}
+                        <button type="button" className={`secondary-btn bookmark-btn ${favoriteIds.has(property._id) ? 'is-saved' : ''}`} onClick={handleSave}>
+                          <span className="bookmark-btn-icon" aria-hidden="true">{favoriteIds.has(property._id) ? '★' : '☆'}</span>
+                          <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
                         </button>
                       ) : null}
                     </div>
