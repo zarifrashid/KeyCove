@@ -1,4 +1,5 @@
 import Favorite from '../models/Favorite.js'
+import Property from '../models/Property.js'
 import Recommendation from '../models/Recommendation.js'
 import UserPreference from '../models/UserPreference.js'
 import { logInteraction } from '../services/recommendations/interactionService.js'
@@ -88,6 +89,11 @@ export async function addFavorite(req, res) {
     const { propertyId, recommendationId = null } = req.body || {}
     if (!propertyId) {
       return res.status(400).json({ message: 'Property ID is required.' })
+    }
+
+    const property = await Property.findOne({ _id: propertyId, status: 'active' }).select('_id')
+    if (!property) {
+      return res.status(404).json({ message: 'Active property not found.' })
     }
 
     const favorite = await Favorite.findOneAndUpdate(

@@ -7,8 +7,9 @@ import RecommendationCard from './RecommendationCard'
 
 export default function RecommendationSection({ compact = false }) {
   const { user } = useAuth()
-  const { favoriteIds, saveFavorite } = useFavorites()
+  const { favoriteIds, toggleFavorite } = useFavorites()
   const [state, setState] = useState({ loading: user?.role === 'tenant', error: '', items: [], summary: '' })
+  const [bookmarkBusyId, setBookmarkBusyId] = useState('')
 
   useEffect(() => {
     if (user?.role !== 'tenant') return
@@ -33,8 +34,13 @@ export default function RecommendationSection({ compact = false }) {
 
   if (user?.role !== 'tenant') return null
 
-  const handleSave = async (item) => {
-    await saveFavorite(item.property._id, item.recommendationId)
+  const handleSaveToggle = async (item) => {
+    try {
+      setBookmarkBusyId(item.property._id)
+      await toggleFavorite(item.property._id, item.recommendationId)
+    } finally {
+      setBookmarkBusyId('')
+    }
   }
 
   const handleTrackClick = async (item) => {
@@ -77,9 +83,10 @@ export default function RecommendationSection({ compact = false }) {
             key={item.recommendationId || item.property._id}
             item={item}
             isSaved={favoriteIds.has(item.property._id)}
-            onSave={handleSave}
+            onSaveToggle={handleSaveToggle}
             onNotInterested={handleNotInterested}
             onTrackClick={handleTrackClick}
+            bookmarkBusy={bookmarkBusyId === item.property._id}
           />
         ))}
       </div>

@@ -43,12 +43,21 @@ export default function useFavorites() {
     return data
   }, [refreshFavorites])
 
+  const toggleFavorite = useCallback(async (propertyId, recommendationId = null) => {
+    if (favoriteIds.has(propertyId)) {
+      return removeFavorite(propertyId)
+    }
+
+    return saveFavorite(propertyId, recommendationId)
+  }, [favoriteIds, removeFavorite, saveFavorite])
+
   return {
     favorites,
     favoriteIds,
     loading,
     refreshFavorites,
     saveFavorite,
-    removeFavorite
+    removeFavorite,
+    toggleFavorite
   }
 }

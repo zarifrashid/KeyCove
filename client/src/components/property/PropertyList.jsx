@@ -1,6 +1,17 @@
 import PropertyCard from './PropertyCard'
 
-export default function PropertyList({ properties, selectedPropertyId, onSelectProperty, compact = false, emptyTitle = 'No properties found', emptyText = 'Try another search, adjust filters, or move the map.' }) {
+export default function PropertyList({
+  properties,
+  selectedPropertyId,
+  onSelectProperty,
+  compact = false,
+  emptyTitle = 'No properties found',
+  emptyText = 'Try another search, adjust filters, or move the map.',
+  favoriteIds = new Set(),
+  onToggleFavorite = null,
+  bookmarkBusyId = '',
+  bookmarkSavedLabel = 'Saved'
+}) {
   if (!properties.length) {
     return (
       <div className="empty-state compact-empty-state">
@@ -19,6 +30,10 @@ export default function PropertyList({ properties, selectedPropertyId, onSelectP
           isActive={selectedPropertyId === property._id}
           onSelect={onSelectProperty}
           compact={compact}
+          isSaved={favoriteIds.has(property._id)}
+          onToggleFavorite={onToggleFavorite}
+          bookmarkBusy={bookmarkBusyId === property._id}
+          bookmarkSavedLabel={bookmarkSavedLabel}
         />
       ))}
     </div>

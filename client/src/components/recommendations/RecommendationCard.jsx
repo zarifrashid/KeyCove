@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
+import BookmarkButton from '../bookmarks/BookmarkButton'
 
-export default function RecommendationCard({ item, isSaved, onSave, onNotInterested, onTrackClick }) {
+export default function RecommendationCard({ item, isSaved, onSaveToggle, onNotInterested, onTrackClick, bookmarkBusy = false }) {
   const property = item.property
 
   return (
@@ -23,9 +24,11 @@ export default function RecommendationCard({ item, isSaved, onSave, onNotInteres
           >
             View Property
           </Link>
-          <button type="button" className="secondary-btn" onClick={() => onSave(item)} disabled={isSaved}>
-            {isSaved ? 'Saved' : 'Save'}
-          </button>
+          <BookmarkButton
+            isSaved={isSaved}
+            onToggle={() => onSaveToggle(item)}
+            busy={bookmarkBusy}
+          />
           <button type="button" className="secondary-btn ghost-btn" onClick={() => onNotInterested(item)}>
             Not Interested
           </button>

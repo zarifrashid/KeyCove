@@ -5,6 +5,7 @@ import ManagerPropertyList from '../components/property/ManagerPropertyList'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
+import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -128,6 +129,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        <SavedPropertiesSection />
         <RecommendationSection compact />
       </div>
     </>
