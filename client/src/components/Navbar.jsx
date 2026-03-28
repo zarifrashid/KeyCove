@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-export default function Navbar() {
+export default function Navbar({ unreadMessages = 0 }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -53,6 +53,7 @@ export default function Navbar() {
             {user?.role === 'manager' ? <Link to="/add-property">Add Property</Link> : null}
             {user?.role === 'tenant' ? <Link to="/affordability">Affordability</Link> : null}
             {user?.role === 'tenant' ? <Link to="/recommendations">Recommendations</Link> : null}
+            <Link to="/messages">Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}</Link>
             <Link to="/dashboard">Dashboard</Link>
             <button onClick={handleLogout} className="button-link">Logout</button>
           </>

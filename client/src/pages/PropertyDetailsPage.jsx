@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import NeighbourhoodInsightsSection from '../components/neighbourhood/NeighbourhoodInsightsSection'
 import { api } from '../lib/api'
@@ -97,6 +97,7 @@ function DetailsRow({ label, value }) {
 
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { favoriteIds, toggleFavorite } = useFavorites()
   const { id } = useParams()
   const [property, setProperty] = useState(null)
@@ -105,6 +106,7 @@ export default function PropertyDetailsPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [affordabilityState, setAffordabilityState] = useState({ loading: false, error: '', summary: null })
+  const [contactState, setContactState] = useState({ loading: false, error: '' })
   const insightsRef = useRef(null)
 
   useEffect(() => {
@@ -190,6 +192,21 @@ export default function PropertyDetailsPage() {
     await toggleFavorite(property._id)
   }
 
+  const handleContactManager = async () => {
+    if (!property?._id) return
+
+    try {
+      setContactState({ loading: true, error: '' })
+      const { data } = await api.post('/chat/conversations', { propertyId: property._id })
+      navigate(`/messages?conversation=${data.conversation._id}`)
+    } catch (error) {
+      setContactState({ loading: false, error: error.response?.data?.message || 'Unable to open chat right now.' })
+      return
+    }
+
+    setContactState({ loading: false, error: '' })
+  }
+
   const openInsights = () => setShowInsights(true)
 
   return (
@@ -250,12 +267,18 @@ export default function PropertyDetailsPage() {
                       </a>
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
-                        <button type="button" className={`secondary-btn bookmark-btn ${favoriteIds.has(property._id) ? 'is-saved' : ''}`} onClick={handleSave}>
-                          <span className="bookmark-btn-icon" aria-hidden="true">{favoriteIds.has(property._id) ? '★' : '☆'}</span>
-                          <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
-                        </button>
+                        <>
+                          <button type="button" className="primary-btn" onClick={handleContactManager} disabled={contactState.loading}>
+                            {contactState.loading ? 'Opening Chat...' : 'Contact Manager'}
+                          </button>
+                          <button type="button" className={`secondary-btn bookmark-btn ${favoriteIds.has(property._id) ? 'is-saved' : ''}`} onClick={handleSave}>
+                            <span className="bookmark-btn-icon" aria-hidden="true">{favoriteIds.has(property._id) ? '★' : '☆'}</span>
+                            <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
+                          </button>
+                        </>
                       ) : null}
                     </div>
+                    {contactState.error ? <p className="error-text">{contactState.error}</p> : null}
                   </div>
                 </div>
               </>
