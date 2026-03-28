@@ -45,8 +45,10 @@ const recommendationSchema = new mongoose.Schema(
       areaMatch: { type: Boolean, default: false },
       priceMatch: { type: Boolean, default: false },
       propertyTypeMatch: { type: Boolean, default: false },
+      affordabilityFit: { type: Boolean, default: false },
       collaborativeBoost: { type: Number, default: 0 },
-      contentScore: { type: Number, default: 0 }
+      contentScore: { type: Number, default: 0 },
+      badges: [{ type: String }]
     }
   },
   { timestamps: true }

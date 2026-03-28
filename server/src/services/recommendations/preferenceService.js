@@ -17,35 +17,102 @@ function mapToSortedArray(map, limit = 5) {
 }
 
 function calculateRange(values = []) {
-  if (!values.length) {
+  const numbers = values.filter((value) => typeof value === 'number' && !Number.isNaN(value))
+  if (!numbers.length) {
     return { min: null, max: null, average: null }
   }
 
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const average = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+  const min = Math.min(...numbers)
+  const max = Math.max(...numbers)
+  const average = Math.round(numbers.reduce((sum, value) => sum + value, 0) / numbers.length)
 
   return { min, max, average }
 }
 
 function buildSummary(preference) {
-  const area = preference.preferredAreas?.[0]?.value
-  const type = preference.preferredPropertyTypes?.[0]?.value
-  //const avgBudget = preference.preferredPriceRange?.average
-  const avgBudget = null
+  if (!preference?.onboardingCompleted) return ''
+
+  const area = preference.onboardingAnswers?.preferredArea
+  const type = preference.onboardingAnswers?.propertyType
+  const avgBudget = preference.preferredPriceRange?.average || preference.onboardingAnswers?.budgetMax
+  const listingType = preference.onboardingAnswers?.listingType
 
   return [
-    area ? `Top area: ${area}` : null,
-    type ? `Top type: ${type}` : null,
-    avgBudget ? `Typical budget: ৳${avgBudget.toLocaleString()}` : null
-    
+    area ? `Area: ${area}` : null,
+    type ? `Type: ${type}` : null,
+    avgBudget ? `Budget: ৳${Number(avgBudget).toLocaleString()}` : null,
+    listingType ? `Mode: ${listingType}` : null
   ].filter(Boolean).join(' • ')
 }
 
+export function buildPreferencePayloadFromOnboarding(userId, answers = {}, existingPreference = null) {
+  const preferredArea = String(answers.preferredArea || '').trim()
+  const propertyType = String(answers.propertyType || '').trim()
+  const listingType = String(answers.listingType || '').trim()
+  const mustHaveAmenity = String(answers.mustHaveAmenity || '').trim()
+  const budgetMin = answers.budgetMin === '' || answers.budgetMin === null || answers.budgetMin === undefined
+    ? null
+    : Number(answers.budgetMin)
+  const budgetMax = answers.budgetMax === '' || answers.budgetMax === null || answers.budgetMax === undefined
+    ? null
+    : Number(answers.budgetMax)
+  const bedrooms = answers.bedrooms === '' || answers.bedrooms === null || answers.bedrooms === undefined
+    ? null
+    : Number(answers.bedrooms)
+
+  const payload = {
+    user: userId,
+    preferredAreas: preferredArea ? [{ value: preferredArea, score: 10 }] : existingPreference?.preferredAreas || [],
+    dislikedAreas: existingPreference?.dislikedAreas || [],
+    preferredPropertyTypes: propertyType ? [{ value: propertyType, score: 8 }] : existingPreference?.preferredPropertyTypes || [],
+    preferredListingTypes: listingType ? [{ value: listingType, score: 6 }] : existingPreference?.preferredListingTypes || [],
+    preferredAmenities: mustHaveAmenity ? [{ value: mustHaveAmenity, score: 5 }] : existingPreference?.preferredAmenities || [],
+    preferredBedrooms: bedrooms !== null
+      ? { min: Math.max(0, bedrooms - 1), max: bedrooms + 1, average: bedrooms }
+      : existingPreference?.preferredBedrooms || { min: null, max: null, average: null },
+    preferredBathrooms: existingPreference?.preferredBathrooms || { min: null, max: null, average: null },
+    preferredPriceRange: budgetMin !== null || budgetMax !== null
+      ? {
+          min: budgetMin,
+          max: budgetMax,
+          average: budgetMin !== null && budgetMax !== null ? Math.round((budgetMin + budgetMax) / 2) : budgetMax || budgetMin || null
+        }
+      : existingPreference?.preferredPriceRange || { min: null, max: null, average: null },
+    onboardingCompleted: true,
+    onboardingSource: 'tenant-onboarding',
+    onboardingAnswers: {
+      preferredArea,
+      budgetMin,
+      budgetMax,
+      propertyType,
+      bedrooms,
+      listingType,
+      mustHaveAmenity
+    },
+    algorithmVersion: 'v2-hybrid-wow',
+    lastInferredAt: new Date()
+  }
+
+  payload.lastSignalsSummary = buildSummary(payload)
+  return payload
+}
+
+export async function saveOnboardingPreferences(userId, answers = {}) {
+  const existingPreference = await UserPreference.findOne({ user: userId }).lean()
+  const payload = buildPreferencePayloadFromOnboarding(userId, answers, existingPreference)
+
+  return UserPreference.findOneAndUpdate(
+    { user: userId },
+    payload,
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  ).lean()
+}
+
 export async function inferUserPreferences(userId) {
-  const [favorites, interactions] = await Promise.all([
+  const [favorites, interactions, existingPreference] = await Promise.all([
     Favorite.find({ tenant: userId }).populate('property').lean(),
-    InteractionLog.find({ user: userId }).sort({ createdAt: -1 }).limit(200).lean()
+    InteractionLog.find({ user: userId }).sort({ createdAt: -1 }).limit(200).lean(),
+    UserPreference.findOne({ user: userId }).lean()
   ])
 
   const propertyIdsFromInteractions = interactions
@@ -110,6 +177,16 @@ export async function inferUserPreferences(userId) {
     if (interaction.interactionType === 'not_interested') consumeProperty(property, 6, true)
   })
 
+  if (existingPreference?.onboardingCompleted) {
+    if (existingPreference.onboardingAnswers?.preferredArea) incrementWeighted(areaScores, existingPreference.onboardingAnswers.preferredArea, 8)
+    if (existingPreference.onboardingAnswers?.propertyType) incrementWeighted(propertyTypeScores, existingPreference.onboardingAnswers.propertyType, 7)
+    if (existingPreference.onboardingAnswers?.listingType) incrementWeighted(listingTypeScores, existingPreference.onboardingAnswers.listingType, 5)
+    if (existingPreference.onboardingAnswers?.mustHaveAmenity) incrementWeighted(amenityScores, existingPreference.onboardingAnswers.mustHaveAmenity, 5)
+    if (typeof existingPreference.onboardingAnswers?.budgetMin === 'number') prices.push(existingPreference.onboardingAnswers.budgetMin)
+    if (typeof existingPreference.onboardingAnswers?.budgetMax === 'number') prices.push(existingPreference.onboardingAnswers.budgetMax)
+    if (typeof existingPreference.onboardingAnswers?.bedrooms === 'number') bedrooms.push(existingPreference.onboardingAnswers.bedrooms)
+  }
+
   const preferencePayload = {
     user: userId,
     preferredAreas: mapToSortedArray(areaScores),
@@ -120,7 +197,10 @@ export async function inferUserPreferences(userId) {
     preferredBedrooms: calculateRange(bedrooms),
     preferredBathrooms: calculateRange(bathrooms),
     preferredPriceRange: calculateRange(prices),
-    algorithmVersion: 'v1-hybrid',
+    onboardingCompleted: existingPreference?.onboardingCompleted || false,
+    onboardingSource: existingPreference?.onboardingSource || '',
+    onboardingAnswers: existingPreference?.onboardingAnswers || {},
+    algorithmVersion: 'v2-hybrid-wow',
     lastInferredAt: new Date()
   }
 

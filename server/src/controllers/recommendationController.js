@@ -3,7 +3,7 @@ import Property from '../models/Property.js'
 import Recommendation from '../models/Recommendation.js'
 import UserPreference from '../models/UserPreference.js'
 import { logInteraction } from '../services/recommendations/interactionService.js'
-import { inferUserPreferences } from '../services/recommendations/preferenceService.js'
+import { inferUserPreferences, saveOnboardingPreferences } from '../services/recommendations/preferenceService.js'
 import { generateRecommendationsForUser } from '../services/recommendations/recommendationEngine.js'
 
 function ensureTenant(req, res) {
@@ -14,12 +14,21 @@ function ensureTenant(req, res) {
   return true
 }
 
+function parseExcludeParam(rawValue) {
+  if (!rawValue) return []
+  return String(rawValue)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 export async function getRecommendations(req, res) {
   try {
     if (!ensureTenant(req, res)) return
 
     const limit = Math.min(12, Math.max(1, Number(req.query.limit) || 6))
-    const result = await generateRecommendationsForUser(req.user.userId, { limit, refresh: true })
+    const excludePropertyIds = parseExcludeParam(req.query.exclude)
+    const result = await generateRecommendationsForUser(req.user.userId, { limit, refresh: true, excludePropertyIds })
     res.status(200).json({ success: true, ...result })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to generate recommendations.' })
@@ -144,8 +153,53 @@ export async function getPreferenceSnapshot(req, res) {
     if (!ensureTenant(req, res)) return
 
     const preference = await UserPreference.findOne({ user: req.user.userId }).lean()
-    res.status(200).json({ success: true, preference })
+    const interactionSummary = {
+      interactions: await Recommendation.countDocuments({ user: req.user.userId }),
+      hasOnboarding: Boolean(preference?.onboardingCompleted)
+    }
+    res.status(200).json({ success: true, preference, interactionSummary })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to fetch user preferences.' })
+  }
+}
+
+export async function saveRecommendationOnboarding(req, res) {
+  try {
+    if (!ensureTenant(req, res)) return
+
+    const {
+      preferredArea,
+      budgetMin,
+      budgetMax,
+      propertyType,
+      bedrooms,
+      listingType,
+      mustHaveAmenity
+    } = req.body || {}
+
+    if (!preferredArea || !propertyType || !listingType) {
+      return res.status(400).json({ message: 'Preferred area, property type, and listing type are required.' })
+    }
+
+    const preference = await saveOnboardingPreferences(req.user.userId, {
+      preferredArea,
+      budgetMin,
+      budgetMax,
+      propertyType,
+      bedrooms,
+      listingType,
+      mustHaveAmenity
+    })
+
+    const recommendations = await generateRecommendationsForUser(req.user.userId, { limit: 9, refresh: true })
+
+    res.status(200).json({
+      success: true,
+      message: 'Taste profile saved.',
+      preference,
+      recommendations
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Failed to save onboarding preferences.' })
   }
 }
