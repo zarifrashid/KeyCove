@@ -5,7 +5,7 @@ export default function RecommendationsPage() {
   return (
     <>
       <Navbar />
-      <div className="page-wrap">
+      <div className="page-wrap recommendation-page-wrap">
         <RecommendationSection />
       </div>
     </>

@@ -41,6 +41,23 @@ const userPreferenceSchema = new mongoose.Schema(
       type: String,
       default: ''
     },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false
+    },
+    onboardingSource: {
+      type: String,
+      default: ''
+    },
+    onboardingAnswers: {
+      preferredArea: { type: String, default: '' },
+      budgetMin: { type: Number, default: null },
+      budgetMax: { type: Number, default: null },
+      propertyType: { type: String, default: '' },
+      bedrooms: { type: Number, default: null },
+      listingType: { type: String, default: '' },
+      mustHaveAmenity: { type: String, default: '' }
+    },
     algorithmVersion: {
       type: String,
       default: 'v1-hybrid'
