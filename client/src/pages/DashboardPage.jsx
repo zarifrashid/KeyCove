@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
 import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
+import RequestSection from '../components/requests/RequestSection'
+import TenantPropertyStatusSection from '../components/requests/TenantPropertyStatusSection'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -13,6 +15,8 @@ export default function DashboardPage() {
   const [managerState, setManagerState] = useState({ loading: user?.role === 'manager', deletingId: '', error: '', properties: [] })
   const [flashMessage, setFlashMessage] = useState(location.state?.flashMessage || '')
   const [unreadTotal, setUnreadTotal] = useState(0)
+  const [requestState, setRequestState] = useState({ loading: Boolean(user), reviewingId: '', error: '', requests: [] })
+  const [tenantPropertyState, setTenantPropertyState] = useState({ loading: user?.role === 'tenant', updatingId: '', error: '', properties: [] })
 
   useEffect(() => {
     if (user?.role !== 'manager') return
@@ -49,6 +53,87 @@ export default function DashboardPage() {
 
     fetchUnreadSummary()
   }, [location.key, user])
+
+
+  useEffect(() => {
+    if (user?.role !== 'tenant') return
+
+    const fetchApprovedProperties = async () => {
+      try {
+        setTenantPropertyState((previous) => ({ ...previous, loading: true, error: '' }))
+        const { data } = await api.get('/property-requests/mine/properties')
+        setTenantPropertyState((previous) => ({ ...previous, loading: false, properties: data.properties || [] }))
+      } catch (error) {
+        setTenantPropertyState((previous) => ({
+          ...previous,
+          loading: false,
+          error: error.response?.data?.message || 'Failed to load your approved property history.'
+        }))
+      }
+    }
+
+    fetchApprovedProperties()
+  }, [location.key, user?.role])
+
+
+  useEffect(() => {
+    if (!user) return
+
+    const fetchRequests = async () => {
+      try {
+        setRequestState((previous) => ({ ...previous, loading: true, error: '' }))
+        const endpoint = user.role === 'manager' ? '/property-requests/manager' : '/property-requests/mine'
+        const { data } = await api.get(endpoint)
+        setRequestState((previous) => ({ ...previous, loading: false, requests: data.requests || [] }))
+      } catch (error) {
+        setRequestState((previous) => ({
+          ...previous,
+          loading: false,
+          error: error.response?.data?.message || 'Failed to load property requests.'
+        }))
+      }
+    }
+
+    fetchRequests()
+  }, [location.key, user])
+
+  const handleReviewRequest = async (requestId, status) => {
+    try {
+      setRequestState((previous) => ({ ...previous, reviewingId: requestId, error: '' }))
+      const { data } = await api.patch(`/property-requests/${requestId}/status`, { status })
+      setRequestState((previous) => ({
+        ...previous,
+        reviewingId: '',
+        requests: previous.requests.map((item) => item._id === requestId ? data.request : item)
+      }))
+      setFlashMessage(`Request ${status} successfully.`)
+    } catch (error) {
+      setRequestState((previous) => ({
+        ...previous,
+        reviewingId: '',
+        error: error.response?.data?.message || 'Failed to update the request.'
+      }))
+    }
+  }
+
+  const handleUpdateOccupancyStatus = async (requestId, occupancyStatus) => {
+    try {
+      setTenantPropertyState((previous) => ({ ...previous, updatingId: requestId, error: '' }))
+      const { data } = await api.patch(`/property-requests/${requestId}/occupancy-status`, { occupancyStatus })
+      setTenantPropertyState((previous) => ({
+        ...previous,
+        updatingId: '',
+        properties: previous.properties.map((item) => item._id === requestId ? data.propertyRecord : item)
+      }))
+      setFlashMessage(`Property marked as ${occupancyStatus}.`)
+    } catch (error) {
+      setTenantPropertyState((previous) => ({
+        ...previous,
+        updatingId: '',
+        error: error.response?.data?.message || 'Failed to update your property status.'
+      }))
+    }
+  }
 
   const handleDelete = async (propertyId) => {
     const confirmed = window.confirm('Are you sure you want to delete this property?')
@@ -121,6 +206,18 @@ export default function DashboardPage() {
                 />
               )}
             </section>
+
+            <RequestSection
+              title="Tenant Requests"
+              subtitle="Review rent, lease, and buy requests submitted for your properties."
+              requests={requestState.requests}
+              loading={requestState.loading}
+              error={requestState.error}
+              emptyText="No property requests have arrived yet."
+              isManager
+              onReview={handleReviewRequest}
+              reviewingId={requestState.reviewingId}
+            />
           </div>
         </div>
       </>
@@ -149,6 +246,23 @@ export default function DashboardPage() {
             <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
           </div>
         </div>
+
+        <RequestSection
+          title="Your Property Requests"
+          subtitle="Track the rent, lease, and buy requests you have already submitted."
+          requests={requestState.requests}
+          loading={requestState.loading}
+          error={requestState.error}
+          emptyText="You have not submitted any property requests yet."
+        />
+
+        <TenantPropertyStatusSection
+          properties={tenantPropertyState.properties}
+          loading={tenantPropertyState.loading}
+          error={tenantPropertyState.error}
+          updatingId={tenantPropertyState.updatingId}
+          onUpdateStatus={handleUpdateOccupancyStatus}
+        />
 
         <SavedPropertiesSection />
         <RecommendationSection compact />

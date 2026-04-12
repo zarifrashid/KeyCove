@@ -71,20 +71,46 @@ export default function PropertyForm({
       {error ? <p className="error-text property-form-error">{error}</p> : null}
 
       <div className="property-grid three-col">
-        <Field label="Title">
-          <input value={form.title} onChange={(event) => onChange('title', event.target.value)} placeholder="Enter property title" />
-        </Field>
-        <Field label="Price">
-          <input type="number" min="0" value={form.price} onChange={(event) => onChange('price', event.target.value)} placeholder="Enter price" />
-        </Field>
-        <Field label="Address">
-          <input
-            value={form.location.address}
-            onChange={(event) => onNestedChange('location', 'address', event.target.value)}
-            placeholder="Enter address"
-          />
-        </Field>
-      </div>
+  <Field label="Title">
+    <input
+      value={form.title}
+      onChange={(event) => onChange('title', event.target.value)}
+      placeholder="Enter property title"
+    />
+  </Field>
+
+  <Field label="Price (Sale)">
+    <input
+      type="number"
+      min="0"
+      step="any"
+      value={form.salePrice}
+      onChange={(event) => onChange('salePrice', event.target.value)}
+      placeholder="Enter total sale price"
+    />
+  </Field>
+
+  <Field label="Rent / Lease Price (Monthly)">
+    <input
+      type="number"
+      min="0"
+      step="any"
+      value={form.rentPrice}
+      onChange={(event) => onChange('rentPrice', event.target.value)}
+      placeholder="Enter monthly rent or lease price"
+    />
+  </Field>
+</div>
+
+<div className="address-wide">
+  <Field label="Address">
+    <input
+      value={form.location.address}
+      onChange={(event) => onNestedChange('location', 'address', event.target.value)}
+      placeholder="Enter address"
+    />
+  </Field>
+</div>
 
       <div className="property-description-wrap">
         <label className="property-field full-width">

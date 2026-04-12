@@ -10,6 +10,7 @@ import recommendationRoutes from './routes/recommendationRoutes.js'
 import affordabilityRoutes from './routes/affordabilityRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import chatRoutes from './routes/chatRoutes.js'
+import propertyRequestRoutes from './routes/propertyRequestRoutes.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -48,6 +49,7 @@ app.use('/api/recommendations', recommendationRoutes)
 app.use('/api/affordability', affordabilityRoutes)
 app.use('/api/uploads', uploadRoutes)
 app.use('/api/chat', chatRoutes)
+app.use('/api/property-requests', propertyRequestRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
 connectDB().then(() => {

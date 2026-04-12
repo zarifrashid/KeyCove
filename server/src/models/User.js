@@ -22,6 +22,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['tenant', 'manager'],
       default: 'tenant'
+    },
+    applicationProfile: {
+      phone: { type: String, default: '', trim: true },
+      occupation: { type: String, default: '', trim: true },
+      monthlyIncome: { type: Number, default: null },
+      employmentStatus: { type: String, default: '', trim: true },
+      employerName: { type: String, default: '', trim: true },
+      currentAddress: { type: String, default: '', trim: true },
+      additionalInfo: { type: String, default: '', trim: true },
+      lastUpdatedAt: { type: Date, default: null }
     }
   },
   { timestamps: true }

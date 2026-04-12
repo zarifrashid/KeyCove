@@ -138,8 +138,19 @@ function validatePublishedProperty(payload) {
   if (!normalizeString(payload.title)) errors.push('Title is required to publish.')
   if (!normalizeString(payload.description)) errors.push('Description is required to publish.')
 
+  const listingType = normalizeString(payload.listingType, 'rent') || 'rent'
   const price = parseOptionalNumber(payload.price)
-  if (price === null || price <= 0) errors.push('Price must be greater than 0 to publish.')
+  const salePrice = parseOptionalNumber(payload.salePrice)
+  const rentPrice = parseOptionalNumber(payload.rentPrice)
+  const effectivePrice =
+    price ??
+    (listingType === 'sale' ? salePrice : rentPrice) ??
+    salePrice ??
+    rentPrice
+
+  if (effectivePrice === null || effectivePrice <= 0) {
+    errors.push('Price must be greater than 0 to publish.')
+  }
 
   const image = normalizeString(payload.image) || normalizeString(payload.images?.[0]?.url)
   if (!image) errors.push('At least one property image is required to publish.')
@@ -181,12 +192,24 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
   const action = normalizeString(payload.action, currentProperty?.status === 'active' ? 'publish' : 'draft').toLowerCase()
   const shouldPublish = action === 'publish'
 
+  const listingType = normalizeString(payload.listingType, currentProperty?.listingType || 'rent') || 'rent'
+  const salePrice = parseOptionalNumber(payload.salePrice, currentProperty?.salePrice ?? null)
+  const rentPrice = parseOptionalNumber(payload.rentPrice, currentProperty?.rentPrice ?? null)
+  const resolvedPrice =
+    parseOptionalNumber(payload.price, currentProperty?.price ?? null) ??
+    (listingType === 'sale' ? salePrice : rentPrice) ??
+    salePrice ??
+    rentPrice ??
+    0
+
   return {
     title: normalizeString(payload.title, currentProperty?.title || ''),
     description: normalizeString(payload.description, currentProperty?.description || ''),
-    price: parseOptionalNumber(payload.price, currentProperty?.price ?? 0) ?? 0,
+    price: resolvedPrice,
+    salePrice,
+    rentPrice,
     propertyType: normalizeString(payload.propertyType, currentProperty?.propertyType || 'Apartment') || 'Apartment',
-    listingType: normalizeString(payload.listingType, currentProperty?.listingType || 'rent') || 'rent',
+    listingType,
     status: shouldPublish ? 'active' : 'draft',
     bedrooms: parseOptionalNumber(payload.bedrooms, currentProperty?.bedrooms ?? 1) ?? 1,
     bathrooms: parseOptionalNumber(payload.bathrooms, currentProperty?.bathrooms ?? 1) ?? 1,
@@ -194,7 +217,9 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
     availableFrom: payload.availableFrom ? new Date(payload.availableFrom) : currentProperty?.availableFrom || new Date(),
     image: nextImage,
     imageAlt: normalizeString(payload.imageAlt, payload.title || currentProperty?.imageAlt || 'Property photo') || 'Property photo',
-    images: nextImages.length ? nextImages : (nextImage ? [{ url: nextImage, sortOrder: 0, isCover: true, source: 'url', uploadedAt: new Date() }] : []),
+    images: nextImages.length
+      ? nextImages
+      : (nextImage ? [{ url: nextImage, sortOrder: 0, isCover: true, source: 'url', uploadedAt: new Date() }] : []),
     manager: managerId,
     amenities: normalizeAmenities(payload.amenities),
     policies: {

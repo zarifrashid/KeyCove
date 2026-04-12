@@ -3497,3 +3497,258 @@ body {
     justify-content: flex-start;
   }
 }
+
+/* Property action requests */
+.property-action-menu-wrap {
+  position: relative;
+}
+
+.property-action-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  z-index: 20;
+}
+
+.property-action-menu button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.property-action-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.property-action-card {
+  padding: 32px;
+}
+
+.property-action-form {
+  display: grid;
+  gap: 24px;
+}
+
+.property-action-topline p:not(.badge) {
+  margin-top: 8px;
+}
+
+.property-action-summary {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.property-action-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.property-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.property-action-grid--lease {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.property-action-highlight,
+.property-action-unavailable {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: rgba(15, 76, 129, 0.06);
+}
+
+.property-action-highlight span,
+.property-action-unavailable p {
+  display: block;
+}
+
+.property-action-highlight strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.2rem;
+}
+
+.property-action-buttons,
+.request-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.request-list {
+  display: grid;
+  gap: 18px;
+}
+
+.request-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  padding: 20px;
+  background: #ffffff;
+}
+
+.request-card-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.request-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.request-section-card {
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .property-action-summary,
+  .property-action-grid,
+  .property-action-grid--lease,
+  .request-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.manager-status-badge.status-pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+}
+
+.manager-status-badge.status-approved {
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+}
+
+.manager-status-badge.status-rejected {
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+}
+
+.request-profile-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.request-profile-panel h5 {
+  margin: 0 0 12px;
+  font-size: 0.98rem;
+}
+
+.request-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 18px;
+}
+
+.request-profile-grid p,
+.tenant-property-status-question {
+  margin: 0;
+}
+
+.tenant-property-status-list {
+  gap: 18px;
+}
+
+.tenant-status-card {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tenant-status-card--previous {
+  opacity: 0.72;
+}
+
+.tenant-property-status-controls {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.tenant-property-status-question {
+  color: #475569;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.property-action-prefill-banner,
+.property-action-cost-summary {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #f8fafc;
+}
+
+.property-action-prefill-banner p,
+.property-action-cost-summary h3,
+.property-action-cost-summary p {
+  margin: 6px 0 0;
+}
+
+.property-action-cost-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.property-action-cost-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.property-action-cost-grid p {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.property-action-cost-grid span,
+.property-action-cost-grid strong {
+  display: block;
+}
+
+.property-action-cost-grid strong {
+  margin-top: 6px;
+}
+
+.request-profile-grid-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .property-action-cost-grid {
+    grid-template-columns: 1fr;
+  }
+}
