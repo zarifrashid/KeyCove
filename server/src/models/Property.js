@@ -17,6 +17,16 @@ const propertySchema = new mongoose.Schema(
       min: 0,
       default: 0
     },
+    salePrice: {
+      type: Number,
+      min: 0,
+      default: null
+    },
+    rentPrice: {
+      type: Number,
+      min: 0,
+      default: null
+    },
     propertyType: {
       type: String,
       enum: ['Apartment', 'Condo', 'Studio', 'Family Home'],

@@ -27,6 +27,18 @@ function formatCurrency(value, listingType) {
   return listingType === 'rent' ? `${amount} / month` : amount
 }
 
+function getRentPrice(property) {
+  if (Number(property?.rentPrice) > 0) return Number(property.rentPrice)
+  if (property?.listingType === 'rent' && Number(property?.price) > 0) return Number(property.price)
+  return 0
+}
+
+function getSalePrice(property) {
+  if (Number(property?.salePrice) > 0) return Number(property.salePrice)
+  if (property?.listingType === 'sale' && Number(property?.price) > 0) return Number(property.price)
+  return 0
+}
+
 function formatDate(value) {
   if (!value) return 'Not specified'
   return new Date(value).toLocaleDateString('en-BD', {
@@ -107,6 +119,7 @@ export default function PropertyDetailsPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [affordabilityState, setAffordabilityState] = useState({ loading: false, error: '', summary: null })
   const [contactState, setContactState] = useState({ loading: false, error: '' })
+  const [actionMenuOpen, setActionMenuOpen] = useState(false)
   const insightsRef = useRef(null)
 
   useEffect(() => {
@@ -209,6 +222,18 @@ export default function PropertyDetailsPage() {
 
   const openInsights = () => setShowInsights(true)
 
+  const availableActions = useMemo(() => ({
+    rent: getRentPrice(property) > 0,
+    lease: getRentPrice(property) > 0,
+    buy: getSalePrice(property) > 0
+  }), [property])
+
+  const handlePropertyAction = (actionType) => {
+    if (!property?._id || user?.role !== 'tenant') return
+    setActionMenuOpen(false)
+    navigate(`/properties/${property._id}/action?type=${actionType}`)
+  }
+
   return (
     <>
       <Navbar />
@@ -268,6 +293,18 @@ export default function PropertyDetailsPage() {
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
                         <>
+                          <div className="property-action-menu-wrap">
+                            <button type="button" className="primary-btn" onClick={() => setActionMenuOpen((previous) => !previous)}>
+                              Take Action
+                            </button>
+                            {actionMenuOpen ? (
+                              <div className="property-action-menu">
+                                <button type="button" onClick={() => handlePropertyAction('rent')} disabled={!availableActions.rent}>Rent</button>
+                                <button type="button" onClick={() => handlePropertyAction('lease')} disabled={!availableActions.lease}>Lease</button>
+                                <button type="button" onClick={() => handlePropertyAction('buy')} disabled={!availableActions.buy}>Buy</button>
+                              </div>
+                            ) : null}
+                          </div>
                           <button type="button" className="primary-btn" onClick={handleContactManager} disabled={contactState.loading}>
                             {contactState.loading ? 'Opening Chat...' : 'Contact Manager'}
                           </button>

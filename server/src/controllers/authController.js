@@ -22,7 +22,8 @@ function sendTokenResponse(res, user) {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      applicationProfile: user.applicationProfile || null
     }
   })
 }
@@ -66,7 +67,8 @@ export async function registerUser(req, res) {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        applicationProfile: user.applicationProfile || null
       }
     })
   } catch (error) {
