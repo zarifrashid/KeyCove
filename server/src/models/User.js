@@ -23,6 +23,16 @@ const userSchema = new mongoose.Schema(
       enum: ['tenant', 'manager'],
       default: 'tenant'
     },
+    phone: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    companyName: {
+      type: String,
+      default: '',
+      trim: true
+    },
     applicationProfile: {
       phone: { type: String, default: '', trim: true },
       occupation: { type: String, default: '', trim: true },

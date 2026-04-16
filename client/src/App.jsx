@@ -11,6 +11,9 @@ import RecommendationsPage from './pages/RecommendationsPage'
 import AffordabilityPage from './pages/AffordabilityPage'
 import MessagesPage from './pages/MessagesPage'
 import PropertyActionPage from './pages/PropertyActionPage'
+import ManagerLeasesPage from './pages/ManagerLeasesPage'
+import TenantLeasesPage from './pages/TenantLeasesPage'
+import LeaseDetailsPage from './pages/LeaseDetailsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -50,7 +53,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/properties/:id/action"
         element={
@@ -64,6 +66,30 @@ export default function App() {
         element={
           <ProtectedRoute>
             <PropertyDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/leases"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <ManagerLeasesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-leases"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantLeasesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leases/:id"
+        element={
+          <ProtectedRoute>
+            <LeaseDetailsPage />
           </ProtectedRoute>
         }
       />
@@ -83,8 +109,6 @@ export default function App() {
           </AuthOnlyRoute>
         }
       />
-
-
       <Route
         path="/affordability"
         element={
@@ -101,7 +125,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/messages"
         element={

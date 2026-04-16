@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function formatMoney(value, suffix = '') {
   const numericValue = Number(value || 0)
   const amount = `৳ ${numericValue.toLocaleString()}`
@@ -49,7 +51,7 @@ function TenantProfilePanel({ tenant, snapshot }) {
       <div className="request-profile-grid">
         <p><strong>Name:</strong> {normalizedSnapshot.name || tenant?.name || 'Not available'}</p>
         <p><strong>Email:</strong> {normalizedSnapshot.email || tenant?.email || 'Not available'}</p>
-        <p><strong>Phone:</strong> {normalizedSnapshot.phone || 'Not provided'}</p>
+        <p><strong>Phone:</strong> {normalizedSnapshot.phone || tenant?.phone || 'Not provided'}</p>
         <p><strong>Role:</strong> {tenant?.role || 'tenant'}</p>
         <p><strong>Occupation:</strong> {normalizedSnapshot.occupation || 'Not provided'}</p>
         <p><strong>Employment Status:</strong> {normalizedSnapshot.employmentStatus || 'Not provided'}</p>
@@ -107,6 +109,7 @@ export default function RequestSection({
         <div className="request-list">
           {requests.map((request) => {
             const normalizedSnapshot = request?.tenantSnapshot || request?.applicationDetails || {}
+            const isLeaseEligible = isManager && request.status === 'approved' && ['rent', 'lease'].includes(request.actionType)
 
             return (
               <article key={request._id} className="request-card">
@@ -135,12 +138,21 @@ export default function RequestSection({
                     {request.reviewedAt ? (
                       <p><strong>Reviewed:</strong> {new Date(request.reviewedAt).toLocaleString()}</p>
                     ) : null}
-                    {request.note ? <p><strong>Note:</strong> {request.note}</p> : null}
+                    {request.note ? <p><strong>Message:</strong> {request.note}</p> : null}
                   </div>
                 </div>
 
                 {isManager ? (
                   <TenantProfilePanel tenant={request.tenant} snapshot={normalizedSnapshot} />
+                ) : null}
+
+                {isLeaseEligible ? (
+                  <div className="request-profile-panel request-profile-panel-inline-note">
+                    <p>
+                      This approved request is lease-ready. Create the actual lease record from{' '}
+                      <Link to="/manager/leases">Lease Details</Link> so request history and lease management stay separate.
+                    </p>
+                  </div>
                 ) : null}
 
                 {isManager && request.status === 'pending' ? (

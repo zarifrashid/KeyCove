@@ -25,7 +25,7 @@ const ACTION_COPY = {
   rent: {
     title: 'Rent Property',
     submitLabel: 'Apply for Rent',
-    helper: 'Your profile details are already filled in. Review the monthly amount, add an optional note, and send your request to the manager.'
+    helper: 'Your saved application details are filled in from the backend. Review them and send your rent request to the manager.'
   },
   lease: {
     title: 'Lease Property',
@@ -35,7 +35,7 @@ const ACTION_COPY = {
   buy: {
     title: 'Buy Property',
     submitLabel: 'Apply to Buy',
-    helper: 'Your profile details are pre-filled. Review the sale price and submit your purchase interest to the manager.'
+    helper: 'Your saved application details are loaded from the backend. Review the sale price and submit your purchase interest.'
   }
 }
 
@@ -51,15 +51,15 @@ export default function PropertyActionPage() {
   const [applicationDetails, setApplicationDetails] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '',
-    occupation: '',
-    monthlyIncome: '',
-    employmentStatus: '',
-    employerName: '',
-    currentAddress: '',
-    additionalInfo: ''
+    phone: user?.phone || '',
+    occupation: user?.applicationProfile?.occupation || '',
+    monthlyIncome: user?.applicationProfile?.monthlyIncome ?? '',
+    employmentStatus: user?.applicationProfile?.employmentStatus || '',
+    employerName: user?.applicationProfile?.employerName || '',
+    currentAddress: user?.applicationProfile?.currentAddress || '',
+    additionalInfo: user?.applicationProfile?.additionalInfo || ''
   })
-  const [pricingPreview, setPricingPreview] = useState(null)
+  const [pricingPreview, setPricingPreview] = useState({ applicationFee: 0, serviceFee: 0 })
   const [state, setState] = useState({ loading: true, submitting: false, error: '', success: '' })
 
   const copy = ACTION_COPY[actionType]
@@ -75,13 +75,14 @@ export default function PropertyActionPage() {
 
         setProperty(propertyData.property)
 
-        const autoFilled = prefillData.prefill?.autoFilled || {}
-        const suggestions = prefillData.prefill?.suggestions || {}
+        const prefillRoot = prefillData.prefill || {}
+        const autoFilled = prefillRoot.autoFilled || prefillRoot
+        const suggestions = prefillRoot.suggestions || {}
 
         setApplicationDetails({
           name: autoFilled.name || user?.name || '',
           email: autoFilled.email || user?.email || '',
-          phone: autoFilled.phone || '',
+          phone: autoFilled.phone || user?.phone || '',
           occupation: autoFilled.occupation || '',
           monthlyIncome: autoFilled.monthlyIncome ?? '',
           employmentStatus: autoFilled.employmentStatus || '',
@@ -89,18 +90,28 @@ export default function PropertyActionPage() {
           currentAddress: autoFilled.currentAddress || '',
           additionalInfo: autoFilled.additionalInfo || ''
         })
+
         if (actionType === 'lease' && suggestions.suggestedLeaseMonths) {
           setLeaseMonths(String(suggestions.suggestedLeaseMonths))
         }
-        setPricingPreview(prefillData.prefill?.pricingPreview || null)
+
+        setPricingPreview(prefillRoot.pricingPreview || {
+          applicationFee: 0,
+          serviceFee: 0
+        })
         setState((previous) => ({ ...previous, loading: false }))
       } catch (error) {
-        setState({ loading: false, submitting: false, error: error.response?.data?.message || 'Failed to load property.', success: '' })
+        setState({
+          loading: false,
+          submitting: false,
+          error: error.response?.data?.message || 'Failed to load property request form.',
+          success: ''
+        })
       }
     }
 
     if (id && actionType) fetchPropertyAndPrefill()
-  }, [actionType, id, user?.email, user?.name])
+  }, [actionType, id, user?.applicationProfile, user?.email, user?.name, user?.phone])
 
   const monthlyRent = useMemo(() => getRentPrice(property), [property])
   const salePrice = useMemo(() => getSalePrice(property), [property])
@@ -150,7 +161,14 @@ export default function PropertyActionPage() {
         propertyId: id,
         actionType,
         leaseMonths: actionType === 'lease' ? Number(leaseMonths) : undefined,
-        note,
+        message: note,
+        phone: applicationDetails.phone,
+        occupation: applicationDetails.occupation,
+        monthlyIncome: Number(applicationDetails.monthlyIncome || 0),
+        employmentStatus: applicationDetails.employmentStatus,
+        employerName: applicationDetails.employerName,
+        currentAddress: applicationDetails.currentAddress,
+        additionalInfo: applicationDetails.additionalInfo,
         applicationDetails: {
           phone: applicationDetails.phone,
           occupation: applicationDetails.occupation,
@@ -162,7 +180,12 @@ export default function PropertyActionPage() {
         }
       }
       await api.post('/property-requests', payload)
-      setState({ loading: false, submitting: false, error: '', success: 'Your request was sent to the manager successfully.' })
+      setState({
+        loading: false,
+        submitting: false,
+        error: '',
+        success: 'Your request was sent to the manager successfully.'
+      })
       setTimeout(() => {
         navigate('/dashboard')
       }, 800)
@@ -215,8 +238,11 @@ export default function PropertyActionPage() {
               ) : (
                 <>
                   <div className="property-action-prefill-banner">
-                    <strong>Auto-filled application</strong>
-                    <p>Your saved profile details are pre-filled below. Review them, update anything that changed, and then submit your application.</p>
+                    <strong>Backend-filled application</strong>
+                    <p>
+                      These values are loaded from your saved application profile and latest request data. Update anything
+                      that changed before submitting.
+                    </p>
                   </div>
 
                   <div className="property-action-grid">
@@ -354,7 +380,7 @@ export default function PropertyActionPage() {
                   </div>
 
                   <label className="property-field full-width">
-                    <span>Note to Manager (Optional)</span>
+                    <span>Message to Manager (Optional)</span>
                     <textarea
                       value={note}
                       onChange={(event) => setNote(event.target.value)}
