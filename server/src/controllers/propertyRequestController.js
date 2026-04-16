@@ -2,6 +2,7 @@ import Property from '../models/Property.js'
 import PropertyRequest from '../models/PropertyRequest.js'
 import TenantPropertyRecord from '../models/TenantPropertyRecord.js'
 import ManagerDecision from '../models/ManagerDecision.js'
+import User from '../models/User.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -34,6 +35,23 @@ function resolveSalePrice(property) {
   return null
 }
 
+function buildTenantSnapshot(request, fallbackUser = {}) {
+  const snapshot = request?.tenantSnapshot || {}
+  const profile = fallbackUser?.applicationProfile || {}
+
+  return {
+    name: normalizeString(snapshot.name || fallbackUser?.name),
+    email: normalizeString(snapshot.email || fallbackUser?.email),
+    phone: normalizeString(snapshot.phone || fallbackUser?.phone || profile.phone),
+    occupation: normalizeString(snapshot.occupation || profile.occupation),
+    monthlyIncome: parseOptionalNumber(snapshot.monthlyIncome ?? profile.monthlyIncome),
+    employmentStatus: normalizeString(snapshot.employmentStatus || profile.employmentStatus),
+    employerName: normalizeString(snapshot.employerName || profile.employerName),
+    currentAddress: normalizeString(snapshot.currentAddress || profile.currentAddress),
+    additionalInfo: normalizeString(snapshot.additionalInfo || profile.additionalInfo)
+  }
+}
+
 function mapRequest(request) {
   return {
     _id: request._id,
@@ -45,9 +63,10 @@ function mapRequest(request) {
     reviewedAt: request.reviewedAt || null,
     occupancyUpdatedAt: request.occupancyUpdatedAt || null,
     statusHistory: Array.isArray(request.statusHistory) ? request.statusHistory : [],
-    tenantSnapshot: request.tenantSnapshot || {},
+    tenantSnapshot: buildTenantSnapshot(request, request.tenant),
     pricing: request.pricing || {},
     note: request.note || '',
+    message: request.note || '',
     property: request.property,
     tenant: request.tenant,
     manager: request.manager
@@ -57,8 +76,8 @@ function mapRequest(request) {
 async function populateRequestById(requestId) {
   return PropertyRequest.findById(requestId)
     .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
-    .populate('tenant', 'name email role createdAt updatedAt')
-    .populate('manager', 'name email role')
+    .populate('tenant', 'name email role phone companyName applicationProfile createdAt updatedAt')
+    .populate('manager', 'name email role phone companyName applicationProfile')
     .lean()
 }
 
@@ -164,13 +183,14 @@ export async function getPropertyRequestPrefill(req, res) {
     }
 
     const propertyId = req.params.propertyId || req.query.propertyId || req.body?.propertyId
+    const actionType = req.query.type || req.body?.actionType || 'rent'
 
     if (!propertyId) {
       return res.status(400).json({ message: 'Property ID is required.' })
     }
 
     const property = await Property.findById(propertyId)
-      .populate('manager', 'name email role')
+      .populate('manager', 'name email role phone companyName')
       .lean()
 
     if (!property || property.status === 'deleted') {
@@ -182,19 +202,39 @@ export async function getPropertyRequestPrefill(req, res) {
       .lean()
 
     const latestSnapshot = latestRequest?.tenantSnapshot || {}
+    const profile = req.user.applicationProfile || {}
+    const prefillFields = {
+      name: normalizeString(req.user.name, latestSnapshot.name || ''),
+      email: normalizeString(req.user.email, latestSnapshot.email || ''),
+      phone: normalizeString(latestSnapshot.phone || req.user.phone || profile.phone),
+      occupation: normalizeString(latestSnapshot.occupation || profile.occupation),
+      monthlyIncome: parseOptionalNumber(latestSnapshot.monthlyIncome ?? profile.monthlyIncome),
+      employmentStatus: normalizeString(latestSnapshot.employmentStatus || profile.employmentStatus),
+      employerName: normalizeString(latestSnapshot.employerName || profile.employerName),
+      currentAddress: normalizeString(latestSnapshot.currentAddress || profile.currentAddress),
+      additionalInfo: normalizeString(latestSnapshot.additionalInfo || profile.additionalInfo)
+    }
+
+    const monthlyRent = resolveMonthlyRent(property)
+    const salePrice = resolveSalePrice(property)
+    const suggestedLeaseMonths = latestRequest?.actionType === 'lease' && latestRequest?.pricing?.leaseMonths
+      ? latestRequest.pricing.leaseMonths
+      : 12
 
     res.status(200).json({
       success: true,
       prefill: {
-        name: normalizeString(req.user.name, latestSnapshot.name || ''),
-        email: normalizeString(req.user.email, latestSnapshot.email || ''),
-        phone: normalizeString(latestSnapshot.phone),
-        occupation: normalizeString(latestSnapshot.occupation),
-        monthlyIncome: parseOptionalNumber(latestSnapshot.monthlyIncome),
-        employmentStatus: normalizeString(latestSnapshot.employmentStatus),
-        employerName: normalizeString(latestSnapshot.employerName),
-        currentAddress: normalizeString(latestSnapshot.currentAddress),
-        additionalInfo: normalizeString(latestSnapshot.additionalInfo)
+        ...prefillFields,
+        autoFilled: prefillFields,
+        suggestions: {
+          suggestedLeaseMonths: actionType === 'lease' ? suggestedLeaseMonths : undefined
+        },
+        pricingPreview: {
+          applicationFee: 0,
+          serviceFee: 0,
+          monthlyRent,
+          salePrice
+        }
       },
       property: {
         _id: property._id,
@@ -203,8 +243,8 @@ export async function getPropertyRequestPrefill(req, res) {
         location: property.location,
         manager: property.manager,
         pricing: {
-          monthlyRent: resolveMonthlyRent(property),
-          salePrice: resolveSalePrice(property)
+          monthlyRent,
+          salePrice
         }
       }
     })
@@ -219,19 +259,23 @@ export async function createPropertyRequest(req, res) {
       return res.status(403).json({ message: 'Only tenants can submit property requests.' })
     }
 
+    const payload = req.body || {}
+    const nestedDetails = payload.applicationDetails || {}
+
     const {
       propertyId,
       actionType,
-      leaseMonths,
-      note,
-      phone,
-      occupation,
-      monthlyIncome,
-      employmentStatus,
-      employerName,
-      currentAddress,
-      additionalInfo
-    } = req.body || {}
+      leaseMonths
+    } = payload
+
+    const noteOrMessage = payload.note ?? payload.message ?? ''
+    const phone = payload.phone ?? nestedDetails.phone
+    const occupation = payload.occupation ?? nestedDetails.occupation
+    const monthlyIncome = payload.monthlyIncome ?? nestedDetails.monthlyIncome
+    const employmentStatus = payload.employmentStatus ?? nestedDetails.employmentStatus
+    const employerName = payload.employerName ?? payload.employer ?? nestedDetails.employerName ?? nestedDetails.employer
+    const currentAddress = payload.currentAddress ?? nestedDetails.currentAddress
+    const additionalInfo = payload.additionalInfo ?? nestedDetails.additionalInfo
 
     if (!propertyId) {
       return res.status(400).json({ message: 'Property is required.' })
@@ -241,7 +285,7 @@ export async function createPropertyRequest(req, res) {
       return res.status(400).json({ message: 'Please choose rent, lease, or buy.' })
     }
 
-    const property = await Property.findById(propertyId).populate('manager', 'name email role')
+    const property = await Property.findById(propertyId).populate('manager', 'name email role phone companyName')
 
     if (!property || property.status !== 'active') {
       return res.status(404).json({ message: 'Property not found.' })
@@ -255,10 +299,10 @@ export async function createPropertyRequest(req, res) {
       return res.status(400).json({ message: 'Managers cannot submit requests to their own property.' })
     }
 
-    const monthlyRent = resolveMonthlyRent(property)
+    const monthlyRentValue = resolveMonthlyRent(property)
     const salePrice = resolveSalePrice(property)
 
-    if ((actionType === 'rent' || actionType === 'lease') && !monthlyRent) {
+    if ((actionType === 'rent' || actionType === 'lease') && !monthlyRentValue) {
       return res.status(400).json({ message: 'This property is not available for rent or lease right now.' })
     }
 
@@ -285,36 +329,37 @@ export async function createPropertyRequest(req, res) {
 
     const totalCost =
       actionType === 'lease'
-        ? monthlyRent * normalizedLeaseMonths
+        ? monthlyRentValue * normalizedLeaseMonths
         : actionType === 'buy'
           ? salePrice
-          : monthlyRent
+          : monthlyRentValue
 
     const createdAt = new Date()
+    const normalizedSnapshot = {
+      name: normalizeString(req.user.name),
+      email: normalizeString(req.user.email),
+      phone: normalizeString(phone, req.user.phone || req.user.applicationProfile?.phone || ''),
+      occupation: normalizeString(occupation, req.user.applicationProfile?.occupation || ''),
+      monthlyIncome: parseOptionalNumber(monthlyIncome, req.user.applicationProfile?.monthlyIncome ?? null),
+      employmentStatus: normalizeString(employmentStatus, req.user.applicationProfile?.employmentStatus || ''),
+      employerName: normalizeString(employerName, req.user.applicationProfile?.employerName || ''),
+      currentAddress: normalizeString(currentAddress, req.user.applicationProfile?.currentAddress || ''),
+      additionalInfo: normalizeString(additionalInfo, req.user.applicationProfile?.additionalInfo || '')
+    }
 
     const request = await PropertyRequest.create({
       property: property._id,
       tenant: req.user.userId,
       manager: property.manager._id,
       actionType,
-      tenantSnapshot: {
-        name: req.user.name,
-        email: req.user.email,
-        phone: normalizeString(phone),
-        occupation: normalizeString(occupation),
-        monthlyIncome: parseOptionalNumber(monthlyIncome),
-        employmentStatus: normalizeString(employmentStatus),
-        employerName: normalizeString(employerName),
-        currentAddress: normalizeString(currentAddress),
-        additionalInfo: normalizeString(additionalInfo)
-      },
+      tenantSnapshot: normalizedSnapshot,
       pricing: {
-        monthlyRent,
+        monthlyRent: monthlyRentValue,
         salePrice,
         leaseMonths: normalizedLeaseMonths,
         totalCost
       },
-      note: normalizeString(note),
+      note: normalizeString(noteOrMessage),
       statusHistory: [
         {
           status: 'pending',
@@ -322,6 +367,20 @@ export async function createPropertyRequest(req, res) {
           changedBy: req.user.userId
         }
       ]
+    })
+
+    await User.findByIdAndUpdate(req.user.userId, {
+      $set: {
+        phone: normalizedSnapshot.phone,
+        'applicationProfile.phone': normalizedSnapshot.phone,
+        'applicationProfile.occupation': normalizedSnapshot.occupation,
+        'applicationProfile.monthlyIncome': normalizedSnapshot.monthlyIncome,
+        'applicationProfile.employmentStatus': normalizedSnapshot.employmentStatus,
+        'applicationProfile.employerName': normalizedSnapshot.employerName,
+        'applicationProfile.currentAddress': normalizedSnapshot.currentAddress,
+        'applicationProfile.additionalInfo': normalizedSnapshot.additionalInfo,
+        'applicationProfile.lastUpdatedAt': createdAt
+      }
     })
 
     const populatedRequest = await populateRequestById(request._id)
@@ -340,7 +399,7 @@ export async function getMyTenantRequests(req, res) {
   try {
     const requests = await PropertyRequest.find({ tenant: req.user.userId })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
-      .populate('manager', 'name email role')
+      .populate('manager', 'name email role phone companyName applicationProfile')
       .sort({ createdAt: -1 })
       .lean()
 
@@ -361,7 +420,7 @@ export async function getManagerRequests(req, res) {
 
     const requests = await PropertyRequest.find({ manager: req.user.userId })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
-      .populate('tenant', 'name email role createdAt updatedAt')
+      .populate('tenant', 'name email role phone companyName applicationProfile createdAt updatedAt')
       .sort({ createdAt: -1 })
       .lean()
 
@@ -440,7 +499,7 @@ export async function getApprovedTenantProperties(req, res) {
       status: 'approved'
     })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
-      .populate('manager', 'name email role')
+      .populate('manager', 'name email role phone companyName applicationProfile')
       .sort({ reviewedAt: -1, createdAt: -1 })
       .lean()
 

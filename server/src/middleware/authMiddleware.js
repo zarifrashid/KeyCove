@@ -10,7 +10,7 @@ export async function protect(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallbacksecret')
-    const user = await User.findById(decoded.userId).select('_id role name email applicationProfile')
+    const user = await User.findById(decoded.userId).select('_id role name email phone companyName applicationProfile')
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' })
@@ -21,6 +21,8 @@ export async function protect(req, res, next) {
       role: user.role,
       name: user.name,
       email: user.email,
+      phone: user.phone || '',
+      companyName: user.companyName || '',
       applicationProfile: user.applicationProfile || null
     }
 

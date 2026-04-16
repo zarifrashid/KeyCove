@@ -14,7 +14,9 @@ export async function seedDhakaProperties(req, res) {
         name: 'KeyCove Demo Manager',
         email: managerEmail,
         password: hashedPassword,
-        role: 'manager'
+        role: 'manager',
+        phone: '+8801711000000',
+        companyName: 'KeyCove Realty'
       })
     }
 

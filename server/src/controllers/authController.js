@@ -3,8 +3,25 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { getDbStatus } from '../config/db.js'
 
+function normalizeString(value, fallback = '') {
+  if (value === null || value === undefined) return fallback
+  return String(value).trim()
+}
+
 function generateToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET || 'fallbacksecret', { expiresIn: '7d' })
+}
+
+function serializeUser(user) {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone || '',
+    companyName: user.companyName || '',
+    applicationProfile: user.applicationProfile || null
+  }
 }
 
 function sendTokenResponse(res, user) {
@@ -18,13 +35,7 @@ function sendTokenResponse(res, user) {
 
   res.status(200).json({
     message: 'Success',
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      applicationProfile: user.applicationProfile || null
-    }
+    user: serializeUser(user)
   })
 }
 
@@ -42,10 +53,10 @@ export async function registerUser(req, res) {
   try {
     if (!ensureDbConnection(res)) return
 
-    const { name, email, password, role } = req.body
+    const { name, email, password, role, phone, companyName } = req.body || {}
 
     if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: 'All fields are required' })
+      return res.status(400).json({ message: 'All required fields must be provided.' })
     }
 
     const existingUser = await User.findOne({ email })
@@ -54,22 +65,32 @@ export async function registerUser(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
+    const normalizedPhone = normalizeString(phone)
+
     const user = await User.create({
-      name,
-      email,
+      name: normalizeString(name),
+      email: normalizeString(email).toLowerCase(),
       password: hashedPassword,
-      role
+      role,
+      phone: normalizedPhone,
+      companyName: normalizeString(companyName),
+      applicationProfile: role === 'tenant'
+        ? {
+            phone: normalizedPhone,
+            occupation: '',
+            monthlyIncome: null,
+            employmentStatus: '',
+            employerName: '',
+            currentAddress: '',
+            additionalInfo: '',
+            lastUpdatedAt: normalizedPhone ? new Date() : null
+          }
+        : undefined
     })
 
     res.status(201).json({
       message: 'Account created successfully',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        applicationProfile: user.applicationProfile || null
-      }
+      user: serializeUser(user)
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -115,7 +136,7 @@ export async function getMe(req, res) {
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
     }
-    res.status(200).json({ user })
+    res.status(200).json({ user: serializeUser(user) })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

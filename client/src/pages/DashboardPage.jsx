@@ -7,7 +7,6 @@ import { api } from '../lib/api'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
 import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
 import RequestSection from '../components/requests/RequestSection'
-import TenantPropertyStatusSection from '../components/requests/TenantPropertyStatusSection'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -16,7 +15,6 @@ export default function DashboardPage() {
   const [flashMessage, setFlashMessage] = useState(location.state?.flashMessage || '')
   const [unreadTotal, setUnreadTotal] = useState(0)
   const [requestState, setRequestState] = useState({ loading: Boolean(user), reviewingId: '', error: '', requests: [] })
-  const [tenantPropertyState, setTenantPropertyState] = useState({ loading: user?.role === 'tenant', updatingId: '', error: '', properties: [] })
 
   useEffect(() => {
     if (user?.role !== 'manager') return
@@ -38,7 +36,6 @@ export default function DashboardPage() {
     fetchMyProperties()
   }, [location.key, location.state?.refreshManagerProperties, user?.role])
 
-
   useEffect(() => {
     if (!user) return
 
@@ -53,28 +50,6 @@ export default function DashboardPage() {
 
     fetchUnreadSummary()
   }, [location.key, user])
-
-
-  useEffect(() => {
-    if (user?.role !== 'tenant') return
-
-    const fetchApprovedProperties = async () => {
-      try {
-        setTenantPropertyState((previous) => ({ ...previous, loading: true, error: '' }))
-        const { data } = await api.get('/property-requests/mine/properties')
-        setTenantPropertyState((previous) => ({ ...previous, loading: false, properties: data.properties || [] }))
-      } catch (error) {
-        setTenantPropertyState((previous) => ({
-          ...previous,
-          loading: false,
-          error: error.response?.data?.message || 'Failed to load your approved property history.'
-        }))
-      }
-    }
-
-    fetchApprovedProperties()
-  }, [location.key, user?.role])
-
 
   useEffect(() => {
     if (!user) return
@@ -106,31 +81,16 @@ export default function DashboardPage() {
         reviewingId: '',
         requests: previous.requests.map((item) => item._id === requestId ? data.request : item)
       }))
-      setFlashMessage(`Request ${status} successfully.`)
+      setFlashMessage(
+        status === 'approved'
+          ? 'Request approved successfully. Create the lease from Lease Details when you are ready.'
+          : 'Request rejected successfully.'
+      )
     } catch (error) {
       setRequestState((previous) => ({
         ...previous,
         reviewingId: '',
         error: error.response?.data?.message || 'Failed to update the request.'
-      }))
-    }
-  }
-
-  const handleUpdateOccupancyStatus = async (requestId, occupancyStatus) => {
-    try {
-      setTenantPropertyState((previous) => ({ ...previous, updatingId: requestId, error: '' }))
-      const { data } = await api.patch(`/property-requests/${requestId}/occupancy-status`, { occupancyStatus })
-      setTenantPropertyState((previous) => ({
-        ...previous,
-        updatingId: '',
-        properties: previous.properties.map((item) => item._id === requestId ? data.propertyRecord : item)
-      }))
-      setFlashMessage(`Property marked as ${occupancyStatus}.`)
-    } catch (error) {
-      setTenantPropertyState((previous) => ({
-        ...previous,
-        updatingId: '',
-        error: error.response?.data?.message || 'Failed to update your property status.'
       }))
     }
   }
@@ -172,6 +132,7 @@ export default function DashboardPage() {
               </p>
               <div className="manager-dashboard-actions">
                 <Link to="/add-property" className="primary-btn">Add New Property</Link>
+                <Link to="/manager/leases" className="secondary-btn">Lease Details</Link>
                 <Link to="/explore" className="secondary-btn">Open Explore Map</Link>
                 <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
               </div>
@@ -209,7 +170,7 @@ export default function DashboardPage() {
 
             <RequestSection
               title="Tenant Requests"
-              subtitle="Review rent, lease, and buy requests submitted for your properties."
+              subtitle="Review rent, lease, and buy requests submitted for your properties. Lease creation stays separate inside Lease Details."
               requests={requestState.requests}
               loading={requestState.loading}
               error={requestState.error}
@@ -231,7 +192,7 @@ export default function DashboardPage() {
         <div className="card dashboard-card">
           <p className="badge">Tenant Dashboard</p>
           <h2>Welcome, {user?.name || 'User'}</h2>
-          <p>Your account is active. Explore listings, save favorites, and get smarter recommendations as you browse.</p>
+          <p>Your account is active. Explore listings, save favorites, track request history, and open your dedicated My Leases page directly from the top navigation bar.</p>
           <div className="info-grid">
             <div><strong>Name:</strong> {user?.name}</div>
             <div><strong>Email:</strong> {user?.email}</div>
@@ -249,19 +210,11 @@ export default function DashboardPage() {
 
         <RequestSection
           title="Your Property Requests"
-          subtitle="Track the rent, lease, and buy requests you have already submitted."
+          subtitle="Track the rent, lease, and buy requests you have already submitted. Lease records now live separately in My Leases."
           requests={requestState.requests}
           loading={requestState.loading}
           error={requestState.error}
           emptyText="You have not submitted any property requests yet."
-        />
-
-        <TenantPropertyStatusSection
-          properties={tenantPropertyState.properties}
-          loading={tenantPropertyState.loading}
-          error={tenantPropertyState.error}
-          updatingId={tenantPropertyState.updatingId}
-          onUpdateStatus={handleUpdateOccupancyStatus}
         />
 
         <SavedPropertiesSection />

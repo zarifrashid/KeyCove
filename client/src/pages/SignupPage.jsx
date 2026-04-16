@@ -3,7 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function SignupPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'tenant' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'tenant',
+    phone: '',
+    companyName: ''
+  })
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const { register, login } = useAuth()
@@ -41,7 +48,19 @@ export default function SignupPage() {
   }, [])
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    setForm((previous) => {
+      const nextForm = {
+        ...previous,
+        [name]: value
+      }
+
+      if (name === 'role' && value !== 'manager') {
+        nextForm.companyName = ''
+      }
+
+      return nextForm
+    })
   }
 
   const handleSubmit = async (e) => {
@@ -69,7 +88,7 @@ export default function SignupPage() {
           </div>
 
           <h1>Create<br />Account</h1>
-          <p className="login-reference-subtext">Set up your KeyCove account to explore listings and add new properties.</p>
+          <p className="login-reference-subtext">Set up your KeyCove account to explore listings and manage role-based property tools.</p>
 
           <form onSubmit={handleSubmit} className="login-reference-form signup-reference-form">
             <input
@@ -84,6 +103,13 @@ export default function SignupPage() {
               type="email"
               placeholder="Email"
               value={form.email}
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="phone"
+              placeholder="Phone Number"
+              value={form.phone}
               onChange={handleChange}
               required
             />
@@ -104,6 +130,14 @@ export default function SignupPage() {
               <option value="tenant">Tenant</option>
               <option value="manager">Manager</option>
             </select>
+            {form.role === 'manager' ? (
+              <input
+                name="companyName"
+                placeholder="Company Name (optional)"
+                value={form.companyName}
+                onChange={handleChange}
+              />
+            ) : null}
             <button type="submit" className="login-reference-button">Sign up</button>
           </form>
 
