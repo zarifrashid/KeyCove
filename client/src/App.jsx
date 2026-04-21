@@ -10,6 +10,10 @@ import AddPropertyPage from './pages/AddPropertyPage'
 import RecommendationsPage from './pages/RecommendationsPage'
 import AffordabilityPage from './pages/AffordabilityPage'
 import MessagesPage from './pages/MessagesPage'
+<<<<<<< HEAD
+=======
+import MortgageCalculatorPage from './pages/MortgageCalculatorPage'
+>>>>>>> b410cda (Initial commit for KeyCove project)
 import PropertyActionPage from './pages/PropertyActionPage'
 import ManagerLeasesPage from './pages/ManagerLeasesPage'
 import TenantLeasesPage from './pages/TenantLeasesPage'
@@ -118,6 +122,17 @@ export default function App() {
         }
       />
       <Route
+<<<<<<< HEAD
+=======
+        path="/mortgage-calculator"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <MortgageCalculatorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+>>>>>>> b410cda (Initial commit for KeyCove project)
         path="/recommendations"
         element={
           <ProtectedRoute allowedRole="tenant">
