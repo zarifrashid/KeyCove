@@ -1,0 +1,172 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import SignupPage from './pages/SignupPage'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
+import PropertyDetailsPage from './pages/PropertyDetailsPage'
+import ProtectedRoute from './components/ProtectedRoute'
+import LandingPage from './pages/LandingPage'
+import AddPropertyPage from './pages/AddPropertyPage'
+import RecommendationsPage from './pages/RecommendationsPage'
+import AffordabilityPage from './pages/AffordabilityPage'
+import MessagesPage from './pages/MessagesPage'
+import MortgageCalculatorPage from './pages/MortgageCalculatorPage'
+import PropertyActionPage from './pages/PropertyActionPage'
+import ManagerLeasesPage from './pages/ManagerLeasesPage'
+import TenantLeasesPage from './pages/TenantLeasesPage'
+import LeaseDetailsPage from './pages/LeaseDetailsPage'
+import { useAuth } from './context/AuthContext'
+
+function AuthOnlyRoute({ children }) {
+  const { user, loading } = useAuth()
+
+  if (loading) return <div className="center-box">Checking login...</div>
+  if (user) return <Navigate to="/" replace />
+
+  return children
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route
+        path="/explore"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/add-property"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <AddPropertyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/:id/edit"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <AddPropertyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/:id/action"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <PropertyActionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/:id"
+        element={
+          <ProtectedRoute>
+            <PropertyDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/leases"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <ManagerLeasesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-leases"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantLeasesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leases/:id"
+        element={
+          <ProtectedRoute>
+            <LeaseDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <AuthOnlyRoute>
+            <SignupPage />
+          </AuthOnlyRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <AuthOnlyRoute>
+            <LoginPage />
+          </AuthOnlyRoute>
+        }
+      />
+      <Route
+        path="/affordability"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <AffordabilityPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mortgage-calculator"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <MortgageCalculatorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recommendations"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RecommendationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant-dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager-dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
