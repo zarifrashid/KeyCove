@@ -10,6 +10,7 @@ import AddPropertyPage from './pages/AddPropertyPage'
 import RecommendationsPage from './pages/RecommendationsPage'
 import AffordabilityPage from './pages/AffordabilityPage'
 import MessagesPage from './pages/MessagesPage'
+import MortgageCalculatorPage from './pages/MortgageCalculatorPage'
 import PropertyActionPage from './pages/PropertyActionPage'
 import ManagerLeasesPage from './pages/ManagerLeasesPage'
 import TenantLeasesPage from './pages/TenantLeasesPage'
@@ -114,6 +115,14 @@ export default function App() {
         element={
           <ProtectedRoute allowedRole="tenant">
             <AffordabilityPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mortgage-calculator"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <MortgageCalculatorPage />
           </ProtectedRoute>
         }
       />

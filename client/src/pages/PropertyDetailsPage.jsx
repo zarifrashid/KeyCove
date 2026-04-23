@@ -6,6 +6,7 @@ import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import useFavorites from '../hooks/useFavorites'
 import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
+import PropertyMortgageWidget from '../components/mortgage/PropertyMortgageWidget'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -144,6 +145,10 @@ export default function PropertyDetailsPage() {
   useEffect(() => {
     const fetchAffordability = async () => {
       if (!id || user?.role !== 'tenant') return
+      if (!property || property.listingType !== 'rent') {
+        setAffordabilityState({ loading: false, error: '', summary: null })
+        return
+      }
 
       try {
         setAffordabilityState({ loading: true, error: '', summary: null })
@@ -159,7 +164,7 @@ export default function PropertyDetailsPage() {
     }
 
     fetchAffordability()
-  }, [id, user?.role])
+  }, [id, property, user?.role])
 
   const gallery = useMemo(() => buildGallery(property), [property])
   const selectedImage = gallery[selectedImageIndex]?.url || property?.image || ''
@@ -185,7 +190,7 @@ export default function PropertyDetailsPage() {
   }, [gallery.length, lightboxOpen])
 
   const refreshAffordability = async () => {
-    if (user?.role !== 'tenant') return
+    if (user?.role !== 'tenant' || property?.listingType !== 'rent') return
 
     try {
       setAffordabilityState((previous) => ({ ...previous, loading: true, error: '' }))
@@ -393,11 +398,21 @@ export default function PropertyDetailsPage() {
                 </div>
               </section>
 
-              {user?.role === 'tenant' ? (
+              {user?.role === 'tenant' && property?.listingType === 'sale' ? (
                 <section className="card property-section-card">
                   <div className="property-section-heading">
-                    <h2>Mortgage & Affordability</h2>
-                    <p>The existing affordability tools stay intact and now sit inside a cleaner dedicated section.</p>
+                    <h2>Mortgage & Ownership Cost</h2>
+                    <p>This primary ownership tool is prefilled from the current sale listing so buyers can estimate monthly financing burden with context.</p>
+                  </div>
+                  <PropertyMortgageWidget property={property} />
+                </section>
+              ) : null}
+
+              {user?.role === 'tenant' && property?.listingType === 'rent' ? (
+                <section className="card property-section-card">
+                  <div className="property-section-heading">
+                    <h2>Rent Budget Check</h2>
+                    <p>Affordability stays focused on rent suitability. Mortgage tools are intentionally hidden on rent listings.</p>
                   </div>
                   <PropertyAffordabilityWidget
                     summary={affordabilityState.summary}
@@ -405,6 +420,10 @@ export default function PropertyDetailsPage() {
                     error={affordabilityState.error}
                     onRefresh={refreshAffordability}
                   />
+                  <div className="mortgage-relationship-note rent-only-note">
+                    <h3>Ownership-only tool</h3>
+                    <p>This listing is marked for rent, so the mortgage calculator is hidden here to avoid mixing rent affordability with buy-side financing.</p>
+                  </div>
                 </section>
               ) : null}
 
