@@ -3900,3 +3900,156 @@ body {
     grid-template-columns: 1fr;
   }
 }
+<<<<<<< HEAD
+=======
+
+/* Feature 7: Mortgage & Cost Calculators */
+.mortgage-page-shell {
+  width: min(1160px, 100%);
+}
+
+.mortgage-page-hero,
+.mortgage-form-card,
+.mortgage-result-card,
+.mortgage-breakdown-card,
+.mortgage-context-banner,
+.mortgage-relationship-note {
+  display: grid;
+  gap: 16px;
+}
+
+.mortgage-page-note-grid,
+.mortgage-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.mortgage-relationship-note,
+.mortgage-context-banner,
+.mortgage-notes-box,
+.rent-only-note {
+  background: #f8fbff;
+  border: 1px solid #e1ebf7;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.mortgage-widget-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.mortgage-form-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.mortgage-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mortgage-field {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  color: #314355;
+}
+
+.mortgage-field input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #d8e3f0;
+  font-size: 15px;
+}
+
+.mortgage-field small,
+.mortgage-metric-card small {
+  color: #5d6d7e;
+}
+
+.mortgage-input-section {
+  display: grid;
+  gap: 14px;
+}
+
+.compact-mortgage-heading {
+  margin-bottom: 0;
+}
+
+.mortgage-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.mortgage-metric-card {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid #e1ebf7;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.mortgage-metric-card span,
+.mortgage-breakdown-row span {
+  color: #5d6d7e;
+}
+
+.mortgage-metric-card strong {
+  font-size: 1.15rem;
+}
+
+.mortgage-breakdown-panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e1ebf7;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.mortgage-breakdown-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mortgage-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.mortgage-breakdown-row.total-row {
+  padding-top: 12px;
+  border-top: 1px solid #e7edf5;
+}
+
+.mortgage-notes-box h4 {
+  margin: 0;
+}
+
+.mortgage-notes-box ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: #314355;
+}
+
+.rent-only-note {
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .mortgage-form-actions,
+  .mortgage-breakdown-row {
+    flex-direction: column;
+  }
+}
+>>>>>>> 04d48bb (Added updated files for 8th feature)

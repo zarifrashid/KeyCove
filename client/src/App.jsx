@@ -10,6 +10,10 @@ import AddPropertyPage from './pages/AddPropertyPage'
 import RecommendationsPage from './pages/RecommendationsPage'
 import AffordabilityPage from './pages/AffordabilityPage'
 import MessagesPage from './pages/MessagesPage'
+<<<<<<< HEAD
+=======
+import MortgageCalculatorPage from './pages/MortgageCalculatorPage'
+>>>>>>> 04d48bb (Added updated files for 8th feature)
 import PropertyActionPage from './pages/PropertyActionPage'
 import ManagerLeasesPage from './pages/ManagerLeasesPage'
 import TenantLeasesPage from './pages/TenantLeasesPage'
@@ -118,6 +122,17 @@ export default function App() {
         }
       />
       <Route
+<<<<<<< HEAD
+=======
+        path="/mortgage-calculator"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <MortgageCalculatorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+>>>>>>> 04d48bb (Added updated files for 8th feature)
         path="/recommendations"
         element={
           <ProtectedRoute allowedRole="tenant">
