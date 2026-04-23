@@ -27,6 +27,7 @@ export default function Navbar({ unreadMessages = 0 }) {
         </div>
 
         <div className="explore-nav-right">
+          {user?.role === 'tenant' ? <Link to="/mortgage-calculator" className="explore-nav-link">Mortgage</Link> : null}
           <Link to="/messages" className="explore-nav-link">Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}</Link>
           <Link to="/dashboard" className="explore-nav-link">Dashboard</Link>
           <button onClick={handleLogout} className="explore-logout-btn">Logout</button>
@@ -56,6 +57,7 @@ export default function Navbar({ unreadMessages = 0 }) {
             {user?.role === 'manager' ? <Link to="/manager/leases">Lease Details</Link> : null}
             {user?.role === 'tenant' ? <Link to="/my-leases">My Leases</Link> : null}
             {user?.role === 'tenant' ? <Link to="/affordability">Affordability</Link> : null}
+            {user?.role === 'tenant' ? <Link to="/mortgage-calculator">Mortgage</Link> : null}
             {user?.role === 'tenant' ? <Link to="/recommendations">Recommendations</Link> : null}
             <Link to="/messages">Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}</Link>
             <Link to="/dashboard">Dashboard</Link>
