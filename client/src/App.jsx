@@ -15,6 +15,8 @@ import PropertyActionPage from './pages/PropertyActionPage'
 import ManagerLeasesPage from './pages/ManagerLeasesPage'
 import TenantLeasesPage from './pages/TenantLeasesPage'
 import LeaseDetailsPage from './pages/LeaseDetailsPage'
+import SharedBoardsPage from './pages/SharedBoardsPage'
+import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -139,6 +141,23 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/shared-boards"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <SharedBoardsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/shared-boards/:boardId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <SharedBoardDetailsPage />
           </ProtectedRoute>
         }
       />

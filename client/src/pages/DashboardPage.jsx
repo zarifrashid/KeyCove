@@ -135,6 +135,7 @@ export default function DashboardPage() {
                 <Link to="/manager/leases" className="secondary-btn">Lease Details</Link>
                 <Link to="/explore" className="secondary-btn">Open Explore Map</Link>
                 <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
+            <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
               </div>
               <div className="info-grid manager-info-grid">
                 <div><strong>Name:</strong> {user?.name}</div>
@@ -204,7 +205,9 @@ export default function DashboardPage() {
             <Link to="/explore" className="primary-btn">Explore Properties</Link>
             <Link to="/affordability" className="secondary-btn">Affordability Analyzer</Link>
             <Link to="/recommendations" className="secondary-btn">View Recommendations</Link>
+            <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
             <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
+            <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
           </div>
         </div>
 

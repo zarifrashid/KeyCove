@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import useFavorites from '../hooks/useFavorites'
 import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
 import PropertyMortgageWidget from '../components/mortgage/PropertyMortgageWidget'
+import BoardPickerModal from '../components/sharedBoards/BoardPickerModal'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -121,6 +122,7 @@ export default function PropertyDetailsPage() {
   const [affordabilityState, setAffordabilityState] = useState({ loading: false, error: '', summary: null })
   const [contactState, setContactState] = useState({ loading: false, error: '' })
   const [actionMenuOpen, setActionMenuOpen] = useState(false)
+  const [showSharedBoardModal, setShowSharedBoardModal] = useState(false)
   const insightsRef = useRef(null)
 
   useEffect(() => {
@@ -295,6 +297,11 @@ export default function PropertyDetailsPage() {
                       >
                         Open in Map
                       </a>
+                      {user?.role === 'tenant' ? (
+                        <button type="button" className="secondary-btn" onClick={() => setShowSharedBoardModal(true)}>
+                          Shared Search
+                        </button>
+                      ) : null}
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
                         <>
@@ -446,6 +453,13 @@ export default function PropertyDetailsPage() {
             <button type="button" className="property-lightbox-arrow right" onClick={() => setSelectedImageIndex((previous) => (previous + 1) % gallery.length)}>›</button>
           </div>
         </div>
+      ) : null}
+
+      {showSharedBoardModal && property ? (
+        <BoardPickerModal
+          property={property}
+          onClose={() => setShowSharedBoardModal(false)}
+        />
       ) : null}
     </>
   )
