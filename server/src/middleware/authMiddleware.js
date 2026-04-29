@@ -10,10 +10,17 @@ export async function protect(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallbacksecret')
-    const user = await User.findById(decoded.userId).select('_id role name email phone companyName applicationProfile')
+    const user = await User.findById(decoded.userId).select(
+      '_id role name email phone companyName accountStatus isManagerVerified managerVerificationStatus adminProfile applicationProfile'
+    )
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' })
+    }
+
+    const accountStatus = user.accountStatus || 'active'
+    if (accountStatus === 'suspended' || accountStatus === 'deleted') {
+      return res.status(403).json({ message: 'Account is not active.' })
     }
 
     req.user = {
@@ -23,6 +30,10 @@ export async function protect(req, res, next) {
       email: user.email,
       phone: user.phone || '',
       companyName: user.companyName || '',
+      accountStatus,
+      isManagerVerified: Boolean(user.isManagerVerified),
+      managerVerificationStatus: user.managerVerificationStatus || 'not_submitted',
+      adminProfile: user.adminProfile || null,
       applicationProfile: user.applicationProfile || null
     }
 

@@ -20,8 +20,46 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['tenant', 'manager'],
+      enum: ['tenant', 'manager', 'admin'],
       default: 'tenant'
+    },
+    accountStatus: {
+      type: String,
+      enum: ['active', 'suspended', 'deleted'],
+      default: 'active',
+      index: true
+    },
+    isManagerVerified: {
+      type: Boolean,
+      default: false
+    },
+    managerVerificationStatus: {
+      type: String,
+      enum: ['not_submitted', 'pending', 'verified', 'rejected'],
+      default: 'not_submitted'
+    },
+    suspendedAt: {
+      type: Date,
+      default: null
+    },
+    suspendedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    suspensionReason: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    deletedAt: {
+      type: Date,
+      default: null
+    },
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     },
     phone: {
       type: String,
@@ -32,6 +70,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
       trim: true
+    },
+    adminProfile: {
+      accessLevel: { type: Number, default: 1 },
+      department: { type: String, default: '', trim: true }
     },
     applicationProfile: {
       phone: { type: String, default: '', trim: true },

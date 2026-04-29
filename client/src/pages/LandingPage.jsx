@@ -157,12 +157,19 @@ export default function LandingPage() {
           </p>
 
           <div className="landing-actions">
-            <button type="button" className="dark-btn" onClick={() => goToProtectedFeature('/explore')}>
-              Explore Properties
-            </button>
+            {user?.role === 'admin' ? (
+              <button type="button" className="dark-btn" onClick={() => goToProtectedFeature('/admin')}>
+                Admin Center
+              </button>
+            ) : (
+              <button type="button" className="dark-btn" onClick={() => goToProtectedFeature('/explore')}>
+               Explore Properties
+              </button>
+            )}
+
             {user?.role === 'manager' ? (
               <button type="button" className="gradient-btn" onClick={() => goToProtectedFeature('/add-property')}>
-                + Add Property
+                 + Add Property
               </button>
             ) : null}
           </div>
