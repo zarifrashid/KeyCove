@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import NeighbourhoodInsightsSection from '../components/neighbourhood/NeighbourhoodInsightsSection'
 import { api } from '../lib/api'
@@ -8,6 +8,9 @@ import useFavorites from '../hooks/useFavorites'
 import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
 import PropertyMortgageWidget from '../components/mortgage/PropertyMortgageWidget'
 import BoardPickerModal from '../components/sharedBoards/BoardPickerModal'
+import ARPropertyViewer from '../components/ar/ARPropertyViewer'
+import DecisionNotePanel from '../components/decisionHub/DecisionNotePanel'
+import TrustBadge from '../components/decisionHub/TrustBadge'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -112,6 +115,7 @@ function DetailsRow({ label, value }) {
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const { favoriteIds, toggleFavorite } = useFavorites()
   const { id } = useParams()
   const [property, setProperty] = useState(null)
@@ -123,7 +127,11 @@ export default function PropertyDetailsPage() {
   const [contactState, setContactState] = useState({ loading: false, error: '' })
   const [actionMenuOpen, setActionMenuOpen] = useState(false)
   const [showSharedBoardModal, setShowSharedBoardModal] = useState(false)
+  const [showARViewer, setShowARViewer] = useState(false)
+  const [trustBadge, setTrustBadge] = useState(null)
+  const [decisionMessage, setDecisionMessage] = useState({ type: '', text: '' })
   const insightsRef = useRef(null)
+  const arViewerRef = useRef(null)
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -139,10 +147,35 @@ export default function PropertyDetailsPage() {
     fetchProperty()
   }, [id])
 
+
+  useEffect(() => {
+    const fetchTrustBadge = async () => {
+      if (!property?._id) return
+      try {
+        const { data } = await api.get(`/decision-hub/trust/${property._id}`)
+        setTrustBadge(data)
+      } catch (error) {
+        setTrustBadge(null)
+      }
+    }
+
+    fetchTrustBadge()
+  }, [property?._id])
+
   useEffect(() => {
     if (!showInsights || !insightsRef.current) return
     insightsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showInsights])
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    if (searchParams.get('ar') === '1') setShowARViewer(true)
+  }, [location.search])
+
+  useEffect(() => {
+    if (!showARViewer || !arViewerRef.current) return
+    arViewerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [showARViewer])
 
   useEffect(() => {
     const fetchAffordability = async () => {
@@ -227,6 +260,27 @@ export default function PropertyDetailsPage() {
     setContactState({ loading: false, error: '' })
   }
 
+
+  const handleAddToCompare = async () => {
+    if (!property?._id || user?.role !== 'tenant') return
+
+    try {
+      setDecisionMessage({ type: '', text: '' })
+      const { data } = await api.patch(`/decision-hub/${property._id}/compare`, { compareSelected: true })
+      setDecisionMessage({ type: 'success', text: data.message || 'Added to Decision Hub comparison.' })
+    } catch (error) {
+      setDecisionMessage({ type: 'error', text: error.response?.data?.message || 'Unable to add this property to comparison.' })
+    }
+  }
+
+  const handleDecisionNoteSaved = (note) => {
+    if (note?.compareSelected) {
+      setDecisionMessage({ type: 'success', text: 'Decision note saved and comparison updated.' })
+    } else {
+      setDecisionMessage({ type: 'success', text: 'Decision note saved.' })
+    }
+  }
+
   const openInsights = () => setShowInsights(true)
 
   const availableActions = useMemo(() => ({
@@ -274,24 +328,25 @@ export default function PropertyDetailsPage() {
                     <div className="property-badge-row">
                       <span className="badge">{property.propertyType}</span>
                       <span className="badge listing-badge">{property.listingType === 'sale' ? 'Sale' : 'Rent'}</span>
+                      <TrustBadge trust={trustBadge} property={property} compact />
                     </div>
                     <h1>{property.title}</h1>
                     <p className="details-price">{formatCurrency(property.price, property.listingType)}</p>
                     <p className="property-summary-text">{property.description}</p>
                     <div className="info-grid property-hero-info-grid">
-                      <div><strong>Address:</strong> {property.location.address}, {property.location.area}, {property.location.city}</div>
+                      <div><strong>Address:</strong> {property.location?.address}, {property.location?.area}, {property.location?.city}</div>
                       <div><strong>Bedrooms:</strong> {property.bedrooms}</div>
                       <div><strong>Bathrooms:</strong> {property.bathrooms}</div>
                       <div><strong>Total Size:</strong> {property.squareFeet} sqft</div>
                       <div><strong>Manager:</strong> {property.manager?.name || 'KeyCove Demo Manager'}</div>
                       <div><strong>Manager Email:</strong> {property.manager?.email || 'manager@keycove.demo'}</div>
-                      <div><strong>Map Coordinates:</strong> {property.location.latitude}, {property.location.longitude}</div>
+                      <div><strong>Map Coordinates:</strong> {property.location?.latitude}, {property.location?.longitude}</div>
                     </div>
                     <div className="hero-actions property-hero-actions">
                       <Link to="/explore" className="secondary-btn">Back to Map</Link>
                       <a
                         className="primary-btn"
-                        href={`https://www.openstreetmap.org/?mlat=${property.location.latitude}&mlon=${property.location.longitude}#map=16/${property.location.latitude}/${property.location.longitude}`}
+                        href={`https://www.openstreetmap.org/?mlat=${property.location?.latitude || 23.8103}&mlon=${property.location?.longitude || 90.4125}#map=16/${property.location?.latitude || 23.8103}/${property.location?.longitude || 90.4125}`}
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -302,6 +357,15 @@ export default function PropertyDetailsPage() {
                           Shared Search
                         </button>
                       ) : null}
+                      {user?.role === 'tenant' ? (
+                        <>
+                          <button type="button" className="secondary-btn" onClick={handleAddToCompare}>
+                            Add to Compare
+                          </button>
+                          <Link to="/decision-hub" className="secondary-btn">Decision Hub</Link>
+                        </>
+                      ) : null}
+                      <button type="button" className="primary-btn ar-view-button" onClick={() => setShowARViewer(true)}>Design Rooms</button>
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
                         <>
@@ -328,6 +392,7 @@ export default function PropertyDetailsPage() {
                       ) : null}
                     </div>
                     {contactState.error ? <p className="error-text">{contactState.error}</p> : null}
+                    {decisionMessage.text ? <p className={decisionMessage.type === 'error' ? 'error-text' : 'success-text'}>{decisionMessage.text}</p> : null}
                   </div>
                 </div>
               </>
@@ -346,6 +411,35 @@ export default function PropertyDetailsPage() {
                 <FactCard label="Security" value={property.amenities?.some((item) => ['CCTV', '24/7 Security'].includes(item)) ? 'Available' : 'Not listed'} />
               </section>
 
+              <section className="card property-section-card decision-tools-card">
+                <div className="property-section-heading">
+                  <p className="decision-eyebrow">KeyCove Decision Hub</p>
+                  <h2>Decision Tools</h2>
+                  <p>Inspect the listing quality, save private visit notes, and compare this property against your other shortlisted homes.</p>
+                </div>
+                <div className="decision-tools-grid">
+                  <article className="decision-tool-info-card">
+                    <span>Listing trust</span>
+                    <TrustBadge trust={trustBadge} property={property} expandedDefault />
+                    <p>This score rewards complete images, location, amenities, room dimensions, manager verification, and Design Rooms layout.</p>
+                  </article>
+                  <article className="decision-tool-info-card">
+                    <span>Design Rooms connection</span>
+                    <strong>{trustBadge?.hasDesignRoomsLayout ? 'Design Rooms Available' : 'No room design added yet'}</strong>
+                    <p>{trustBadge?.hasDesignRoomsLayout ? 'This listing has room-planning assets that improve confidence before a visit.' : 'Managers can add room dimensions or staging layout to make this listing more trustworthy.'}</p>
+                    <button type="button" className="secondary-btn" onClick={() => setShowARViewer(true)}>Open Design Rooms</button>
+                  </article>
+                </div>
+                {user?.role === 'tenant' ? (
+                  <DecisionNotePanel propertyId={property._id} onSaved={handleDecisionNoteSaved} />
+                ) : (
+                  <div className="decision-manager-note">
+                    <strong>Manager view</strong>
+                    <p>Improve this score by adding more images, full address details, amenities, room dimensions, and a tenant-facing Design Rooms layout. Tenant notes remain private.</p>
+                  </div>
+                )}
+              </section>
+
               <section className="card property-section-card">
                 <div className="property-section-heading">
                   <h2>About This Property</h2>
@@ -353,6 +447,12 @@ export default function PropertyDetailsPage() {
                 </div>
                 <p className="property-body-copy">{property.description}</p>
               </section>
+
+              {showARViewer ? (
+                <div ref={arViewerRef}>
+                  <ARPropertyViewer property={property} user={user} onClose={() => setShowARViewer(false)} />
+                </div>
+              ) : null}
 
               <section className="card property-section-card">
                 <div className="property-section-heading">

@@ -11,7 +11,7 @@ export default async function connectDB() {
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI
 
     if (!mongoUri) {
-      console.log('MongoDB URI is missing. Add MONGODB_URI in server/.env before testing database features.')
+      console.log('MongoDB URI is missing. Add MONGODB_URI or MONGO_URI in server/.env before testing database features.')
       return
     }
 

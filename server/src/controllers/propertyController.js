@@ -185,6 +185,67 @@ function extractBody(req) {
   return req.body && typeof req.body === 'object' ? req.body : {}
 }
 
+
+
+function normalizeRoomTemplates(value) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .slice(0, 12)
+    .map((item, index) => {
+      const name = normalizeString(item?.name, `Room ${index + 1}`) || `Room ${index + 1}`
+      const roomId = normalizeString(item?.roomId, name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) || `room-${index + 1}`
+      const width = parseOptionalNumber(item?.width, 12) ?? 12
+      const length = parseOptionalNumber(item?.length, 12) ?? 12
+
+      return {
+        roomId,
+        name,
+        type: normalizeString(item?.type, 'room') || 'room',
+        width: Math.min(Math.max(width, 4), 40),
+        length: Math.min(Math.max(length, 4), 40),
+        hasBalcony: Boolean(item?.hasBalcony)
+      }
+    })
+    .filter((item) => item.name)
+}
+
+function normalizeFurnitureCatalog(value) {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .slice(0, 20)
+    .map((item, index) => {
+      const width = parseOptionalNumber(item?.dimensions?.width, 80) ?? 80
+      const depth = parseOptionalNumber(item?.dimensions?.depth, 50) ?? 50
+      const height = parseOptionalNumber(item?.dimensions?.height, 40) ?? 40
+
+      return {
+        furnitureId: normalizeString(item?.furnitureId, `furniture-${index + 1}`) || `furniture-${index + 1}`,
+        name: normalizeString(item?.name, 'Furniture') || 'Furniture',
+        category: normalizeString(item?.category, 'general') || 'general',
+        modelUrl: normalizeString(item?.modelUrl),
+        thumbnailUrl: normalizeString(item?.thumbnailUrl || item?.imageUrl),
+        color: normalizeString(item?.color, '#0f4c81') || '#0f4c81',
+        dimensions: {
+          width: Math.min(Math.max(width, 20), 300),
+          depth: Math.min(Math.max(depth, 20), 300),
+          height: Math.min(Math.max(height, 5), 300)
+        }
+      }
+    })
+    .filter((item) => item.name)
+}
+
+function buildARAssets(payload = {}, currentARAssets = {}) {
+  return {
+    propertyModelUrl: normalizeString(payload.propertyModelUrl, currentARAssets.propertyModelUrl || ''),
+    floorPlanModelUrl: normalizeString(payload.floorPlanModelUrl, currentARAssets.floorPlanModelUrl || ''),
+    furnitureCatalog: normalizeFurnitureCatalog(payload.furnitureCatalog || currentARAssets.furnitureCatalog || []),
+    roomTemplates: normalizeRoomTemplates(payload.roomTemplates || currentARAssets.roomTemplates || [])
+  }
+}
+
 function buildPropertyPayload(payload, currentProperty = null, managerId) {
   const location = buildLocation(payload.location, currentProperty?.location || {})
   const nextImages = normalizeImages(payload.images, payload.image || currentProperty?.image || '')
@@ -232,6 +293,7 @@ function buildPropertyPayload(payload, currentProperty = null, managerId) {
       bus: normalizeString(payload.nearbyPlaces?.bus, currentProperty?.nearbyPlaces?.bus || ''),
       restaurant: normalizeString(payload.nearbyPlaces?.restaurant, currentProperty?.nearbyPlaces?.restaurant || '')
     },
+    arAssets: buildARAssets(payload.arAssets || {}, currentProperty?.arAssets || {}),
     location,
     geoLocation: buildGeoLocation(location.latitude, location.longitude)
   }
