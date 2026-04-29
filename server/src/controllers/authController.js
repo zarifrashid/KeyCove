@@ -20,6 +20,10 @@ function serializeUser(user) {
     role: user.role,
     phone: user.phone || '',
     companyName: user.companyName || '',
+    accountStatus: user.accountStatus || 'active',
+    isManagerVerified: Boolean(user.isManagerVerified),
+    managerVerificationStatus: user.managerVerificationStatus || 'not_submitted',
+    adminProfile: user.adminProfile || null,
     applicationProfile: user.applicationProfile || null
   }
 }
@@ -59,7 +63,12 @@ export async function registerUser(req, res) {
       return res.status(400).json({ message: 'All required fields must be provided.' })
     }
 
-    const existingUser = await User.findOne({ email })
+    if (!['tenant', 'manager'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid signup role.' })
+    }
+
+    const normalizedEmail = normalizeString(email).toLowerCase()
+    const existingUser = await User.findOne({ email: normalizedEmail })
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' })
     }
@@ -69,11 +78,14 @@ export async function registerUser(req, res) {
 
     const user = await User.create({
       name: normalizeString(name),
-      email: normalizeString(email).toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
       role,
       phone: normalizedPhone,
       companyName: normalizeString(companyName),
+      accountStatus: 'active',
+      isManagerVerified: false,
+      managerVerificationStatus: role === 'manager' ? 'not_submitted' : 'not_submitted',
       applicationProfile: role === 'tenant'
         ? {
             phone: normalizedPhone,
@@ -107,9 +119,18 @@ export async function loginUser(req, res) {
       return res.status(400).json({ message: 'Email and password are required' })
     }
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email: normalizeString(email).toLowerCase() })
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
+    }
+
+    const accountStatus = user.accountStatus || 'active'
+    if (accountStatus === 'suspended') {
+      return res.status(403).json({ message: 'Your account is suspended. Please contact admin.' })
+    }
+
+    if (accountStatus === 'deleted') {
+      return res.status(403).json({ message: 'This account is no longer available.' })
     }
 
     const isMatch = await bcrypt.compare(password, user.password)

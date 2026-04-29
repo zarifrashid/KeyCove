@@ -5855,3 +5855,260 @@ body {
     flex-direction: column;
   }
 }
+
+/* Global Admin Command Center */
+.admin-command-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-hero-card h1 {
+  margin: 8px 0;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-tabs button {
+  border: 1px solid #d7e3ea;
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #0f4c81;
+}
+
+.admin-tabs button.active,
+.admin-tabs button:hover {
+  background: #0f4c81;
+  color: #ffffff;
+}
+
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+}
+
+.admin-stat-card span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.admin-stat-card strong {
+  display: block;
+  font-size: 30px;
+  margin-top: 8px;
+  color: #0f172a;
+}
+
+.admin-panel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 160px 180px auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-filter-bar input,
+.admin-filter-bar select,
+.manager-verification-form input,
+.manager-verification-form select,
+.manager-verification-form textarea,
+.admin-panel-card select {
+  width: 100%;
+  border: 1px solid #d7e3ea;
+  border-radius: 12px;
+  padding: 11px 12px;
+  font: inherit;
+  background: #ffffff;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: #475569;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.compact-admin-table {
+  min-width: 700px;
+}
+
+.admin-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-action-row .secondary-btn,
+.admin-action-row .primary-btn,
+.admin-action-row .danger-btn {
+  padding: 8px 11px;
+  border-radius: 10px;
+}
+
+.danger-btn {
+  border: none;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-btn:hover {
+  background: #fecaca;
+}
+
+.danger-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-role-pill,
+.admin-status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.admin-role-pill {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.admin-status-pill {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.status-active,
+.status-verified {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-suspended,
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-deleted,
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-not_submitted {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.admin-subsection {
+  margin-top: 18px;
+}
+
+.verification-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-verification-card,
+.manager-verification-card {
+  border: 1px solid #dbe7ef;
+  border-radius: 22px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.verification-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.verification-summary-grid > div {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.verification-summary-wide {
+  grid-column: 1 / -1;
+}
+
+.manager-verification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.form-grid.two-col-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.manager-verification-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.admin-create-card {
+  max-width: 900px;
+}
+
+@media (max-width: 850px) {
+  .admin-filter-bar,
+  .form-grid.two-col-form-grid,
+  .verification-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .verification-summary-wide {
+    grid-column: auto;
+  }
+}

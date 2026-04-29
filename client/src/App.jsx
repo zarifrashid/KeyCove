@@ -18,6 +18,7 @@ import LeaseDetailsPage from './pages/LeaseDetailsPage'
 import SharedBoardsPage from './pages/SharedBoardsPage'
 import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import DecisionHubPage from './pages/DecisionHubPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -146,6 +147,15 @@ export default function App() {
         }
       />
 
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/decision-hub"

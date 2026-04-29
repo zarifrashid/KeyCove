@@ -7,6 +7,7 @@ import { api } from '../lib/api'
 import RecommendationSection from '../components/recommendations/RecommendationSection'
 import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
 import RequestSection from '../components/requests/RequestSection'
+import ManagerVerificationPanel from '../components/manager/ManagerVerificationPanel'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   }, [location.key, user])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || user.role === 'admin') return
 
     const fetchRequests = async () => {
       try {
@@ -117,6 +118,31 @@ export default function DashboardPage() {
     }
   }
 
+  if (user?.role === 'admin') {
+    return (
+      <>
+        <Navbar unreadMessages={unreadTotal} />
+        <div className="page-wrap dashboard-stack">
+          <div className="card dashboard-card">
+            <p className="badge">Admin Dashboard</p>
+            <h2>Welcome, {user?.name || 'Admin'}</h2>
+            <p>Your admin account is active. Open the Global Admin Command Center to manage platform overview, users, roles, and manager verification.</p>
+            <div className="info-grid">
+              <div><strong>Name:</strong> {user?.name}</div>
+              <div><strong>Email:</strong> {user?.email}</div>
+              <div><strong>Role:</strong> {user?.role}</div>
+              <div><strong>Department:</strong> {user?.adminProfile?.department || 'Operations'}</div>
+            </div>
+            <div className="hero-actions" style={{ marginTop: '24px' }}>
+              <Link to="/admin" className="primary-btn">Open Admin Center</Link>
+              <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   if (user?.role === 'manager') {
     return (
       <>
@@ -141,10 +167,13 @@ export default function DashboardPage() {
                 <div><strong>Name:</strong> {user?.name}</div>
                 <div><strong>Email:</strong> {user?.email}</div>
                 <div><strong>Role:</strong> {user?.role}</div>
+                <div><strong>Verification:</strong> {user?.managerVerificationStatus || 'not_submitted'}</div>
                 <div><strong>Listings:</strong> {managerState.properties.length}</div>
                 <div><strong>Unread Messages:</strong> {unreadTotal}</div>
               </div>
             </section>
+
+            <ManagerVerificationPanel />
 
             <section className="card manager-dashboard-list-card">
               <div className="manager-list-header">
