@@ -382,18 +382,18 @@ export default function PropertyForm({
 
       <section className="property-side-panel ar-assets-form-section">
         <div className="property-section-heading compact-heading">
-          <h2>AR Property Viewing Assets</h2>
-          <p>Add cloud-hosted GLB/GLTF URLs. Old listings can leave these blank and still use the layout planner.</p>
+          <h2>Design Rooms Listing Setup</h2>
+          <p>Add optional room dimensions, furnishing catalog items, and 3D model links. Old listings can leave these blank and still use the room planner.</p>
         </div>
         <div className="property-grid two-col">
-          <Field label="3D Property Model URL">
+          <Field label="Optional Property Model URL">
             <input
               value={form.arAssets?.propertyModelUrl || ''}
               onChange={(event) => onARAssetChange?.('propertyModelUrl', event.target.value)}
               placeholder="https://.../property.glb"
             />
           </Field>
-          <Field label="Floor Plan / Room Model URL">
+          <Field label="Optional Floor Plan Model URL">
             <input
               value={form.arAssets?.floorPlanModelUrl || ''}
               onChange={(event) => onARAssetChange?.('floorPlanModelUrl', event.target.value)}
@@ -419,7 +419,7 @@ export default function PropertyForm({
             onChange={(event) => onFurnitureCatalogChange?.(event.target.value)}
             placeholder={'Sofa | https://.../sofa.glb | #0f4c81 | living | https://.../sofa.png\nBed | https://.../bed.glb | #8a5a44 | bedroom | https://.../bed.png'}
           />
-          <small className="muted-text">Format: Name | GLB model URL | color | category | thumbnail image URL. Users can also add their own images inside the room designer.</small>
+          <small className="muted-text">Format: Name | optional model URL | color | category | thumbnail image URL. Tenants can still add their own furniture images inside Design Rooms.</small>
         </label>
       </section>
 

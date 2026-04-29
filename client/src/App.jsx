@@ -17,6 +17,7 @@ import TenantLeasesPage from './pages/TenantLeasesPage'
 import LeaseDetailsPage from './pages/LeaseDetailsPage'
 import SharedBoardsPage from './pages/SharedBoardsPage'
 import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
+import DecisionHubPage from './pages/DecisionHubPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -145,6 +146,15 @@ export default function App() {
         }
       />
 
+
+      <Route
+        path="/decision-hub"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <DecisionHubPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/shared-boards"
         element={

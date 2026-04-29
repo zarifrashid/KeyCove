@@ -15,6 +15,7 @@ import leaseRoutes from './routes/leaseRoutes.js'
 import mortgageRoutes from './routes/mortgageRoutes.js'
 import boardRoutes from './routes/boardRoutes.js'
 import arSessionRoutes from './routes/arSessionRoutes.js'
+import decisionHubRoutes from './routes/decisionHubRoutes.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -58,6 +59,7 @@ app.use('/api/leases', leaseRoutes)
 app.use('/api/mortgage', mortgageRoutes)
 app.use('/api/boards', boardRoutes)
 app.use('/api/ar-session', arSessionRoutes)
+app.use('/api/decision-hub', decisionHubRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
 connectDB().then(() => {

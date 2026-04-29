@@ -28,6 +28,7 @@ export default function Navbar({ unreadMessages = 0 }) {
 
         <div className="explore-nav-right">
           {user?.role === 'tenant' ? <Link to="/mortgage-calculator" className="explore-nav-link">Mortgage</Link> : null}
+          {user?.role === 'tenant' ? <Link to="/decision-hub" className="explore-nav-link">Decision Hub</Link> : null}
           {user?.role === 'tenant' ? <Link to="/shared-boards" className="explore-nav-link">Shared Search</Link> : null}
           <Link to="/messages" className="explore-nav-link">Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}</Link>
           <Link to="/dashboard" className="explore-nav-link">Dashboard</Link>
@@ -60,6 +61,7 @@ export default function Navbar({ unreadMessages = 0 }) {
             {user?.role === 'tenant' ? <Link to="/affordability">Affordability</Link> : null}
             {user?.role === 'tenant' ? <Link to="/mortgage-calculator">Mortgage</Link> : null}
             {user?.role === 'tenant' ? <Link to="/recommendations">Recommendations</Link> : null}
+            {user?.role === 'tenant' ? <Link to="/decision-hub">Decision Hub</Link> : null}
             {user?.role === 'tenant' ? <Link to="/shared-boards">Shared Search</Link> : null}
             <Link to="/messages">Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}</Link>
             <Link to="/dashboard">Dashboard</Link>
