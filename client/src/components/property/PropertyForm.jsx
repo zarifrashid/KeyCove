@@ -43,11 +43,26 @@ export default function PropertyForm({
   onRemoveImage,
   onMoveImage,
   onSetCover,
-  onAddImageUrl
+  onAddImageUrl,
+  onARAssetChange,
+  onFurnitureCatalogChange,
+  onRoomTemplatesChange
 }) {
   const amenitiesText = useMemo(() => form.amenities.join(', '), [form.amenities])
   const galleryImages = Array.isArray(form.galleryImages) ? form.galleryImages : []
   const coverPreview = galleryImages[0]?.previewUrl || galleryImages[0]?.url || ''
+  const furnitureCatalogText = useMemo(
+    () => (form.arAssets?.furnitureCatalog || [])
+      .map((item) => [item.name, item.modelUrl, item.color, item.category, item.thumbnailUrl].filter(Boolean).join(' | '))
+      .join('\n'),
+    [form.arAssets?.furnitureCatalog]
+  )
+  const roomTemplatesText = useMemo(
+    () => (form.arAssets?.roomTemplates || [])
+      .map((room) => [room.name, room.type, room.width, room.length, room.hasBalcony ? 'yes' : 'no'].filter((value) => value !== undefined && value !== null && value !== '').join(' | '))
+      .join('\n'),
+    [form.arAssets?.roomTemplates]
+  )
   const [manualGalleryUrl, setManualGalleryUrl] = useState('')
 
   return (
@@ -364,6 +379,49 @@ export default function PropertyForm({
           </div>
         </div>
       </div>
+
+      <section className="property-side-panel ar-assets-form-section">
+        <div className="property-section-heading compact-heading">
+          <h2>AR Property Viewing Assets</h2>
+          <p>Add cloud-hosted GLB/GLTF URLs. Old listings can leave these blank and still use the layout planner.</p>
+        </div>
+        <div className="property-grid two-col">
+          <Field label="3D Property Model URL">
+            <input
+              value={form.arAssets?.propertyModelUrl || ''}
+              onChange={(event) => onARAssetChange?.('propertyModelUrl', event.target.value)}
+              placeholder="https://.../property.glb"
+            />
+          </Field>
+          <Field label="Floor Plan / Room Model URL">
+            <input
+              value={form.arAssets?.floorPlanModelUrl || ''}
+              onChange={(event) => onARAssetChange?.('floorPlanModelUrl', event.target.value)}
+              placeholder="https://.../floor-plan.glb"
+            />
+          </Field>
+        </div>
+        <label className="property-field full-width">
+          <span>Room Planner Setup</span>
+          <textarea
+            className="property-description-input ar-catalog-textarea"
+            value={roomTemplatesText}
+            onChange={(event) => onRoomTemplatesChange?.(event.target.value)}
+            placeholder={'Living Room | living | 16 | 12 | no\nBedroom 1 | bedroom | 13 | 12 | no\nBalcony | balcony | 10 | 5 | yes'}
+          />
+          <small className="muted-text">Optional. Leave blank and KeyCove will generate room tabs from bedroom count.</small>
+        </label>
+        <label className="property-field full-width">
+          <span>Furniture Catalog</span>
+          <textarea
+            className="property-description-input ar-catalog-textarea"
+            value={furnitureCatalogText}
+            onChange={(event) => onFurnitureCatalogChange?.(event.target.value)}
+            placeholder={'Sofa | https://.../sofa.glb | #0f4c81 | living | https://.../sofa.png\nBed | https://.../bed.glb | #8a5a44 | bedroom | https://.../bed.png'}
+          />
+          <small className="muted-text">Format: Name | GLB model URL | color | category | thumbnail image URL. Users can also add their own images inside the room designer.</small>
+        </label>
+      </section>
 
       <div className="property-form-actions">
         <button type="button" className="secondary-btn" disabled={isSubmitting} onClick={() => onSubmit('draft')}>

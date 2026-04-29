@@ -37,6 +37,12 @@ const INITIAL_FORM = {
     school: '',
     bus: '',
     restaurant: ''
+  },
+  arAssets: {
+    propertyModelUrl: '',
+    floorPlanModelUrl: '',
+    furnitureCatalog: [],
+    roomTemplates: []
   }
 }
 
@@ -148,6 +154,12 @@ function mapPropertyToForm(property) {
       school: property?.nearbyPlaces?.school || '',
       bus: property?.nearbyPlaces?.bus || '',
       restaurant: property?.nearbyPlaces?.restaurant || ''
+    },
+    arAssets: {
+      propertyModelUrl: property?.arAssets?.propertyModelUrl || '',
+      floorPlanModelUrl: property?.arAssets?.floorPlanModelUrl || '',
+      furnitureCatalog: Array.isArray(property?.arAssets?.furnitureCatalog) ? property.arAssets.furnitureCatalog : [],
+      roomTemplates: Array.isArray(property?.arAssets?.roomTemplates) ? property.arAssets.roomTemplates : []
     }
   }
 }
@@ -195,6 +207,69 @@ export default function AddPropertyPage() {
       [group]: {
         ...previous[group],
         [field]: value
+      }
+    }))
+  }
+
+  const handleARAssetChange = (field, value) => {
+    setForm((previous) => ({
+      ...previous,
+      arAssets: {
+        ...previous.arAssets,
+        [field]: value
+      }
+    }))
+  }
+
+  const handleFurnitureCatalogChange = (value) => {
+    const furnitureCatalog = value
+      .split('\n')
+      .map((line, index) => {
+        const [name = '', modelUrl = '', color = '', category = 'general', thumbnailUrl = ''] = line.split('|').map((item) => item.trim())
+        if (!name) return null
+        return {
+          furnitureId: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `furniture-${index + 1}`,
+          name,
+          category: category || 'general',
+          modelUrl,
+          thumbnailUrl,
+          color: color || '#0f4c81',
+          dimensions: { width: 80, depth: 50, height: 40 }
+        }
+      })
+      .filter(Boolean)
+
+    setForm((previous) => ({
+      ...previous,
+      arAssets: {
+        ...previous.arAssets,
+        furnitureCatalog
+      }
+    }))
+  }
+
+  const handleRoomTemplatesChange = (value) => {
+    const roomTemplates = value
+      .split('\n')
+      .map((line, index) => {
+        const [name = '', type = 'room', width = '12', length = '12', balcony = 'no'] = line.split('|').map((item) => item.trim())
+        if (!name) return null
+        return {
+          roomId: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `room-${index + 1}`,
+          name,
+          type: type || 'room',
+          width: Number(width) || 12,
+          length: Number(length) || 12,
+          hasBalcony: ['yes', 'true', '1', 'balcony'].includes(String(balcony).toLowerCase())
+        }
+      })
+      .filter(Boolean)
+
+    setForm((previous) => ({
+      ...previous,
+      arAssets: {
+        ...previous.arAssets,
+        roomTemplates
       }
     }))
   }
@@ -444,6 +519,9 @@ export default function AddPropertyPage() {
               onMoveImage={handleMoveImage}
               onSetCover={handleSetCover}
               onAddImageUrl={handleAddImageUrl}
+              onARAssetChange={handleARAssetChange}
+              onFurnitureCatalogChange={handleFurnitureCatalogChange}
+              onRoomTemplatesChange={handleRoomTemplatesChange}
             />
           )}
         </div>

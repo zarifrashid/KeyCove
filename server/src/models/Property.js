@@ -109,6 +109,43 @@ const propertySchema = new mongoose.Schema(
       bus: { type: String, default: '' },
       restaurant: { type: String, default: '' }
     },
+    arAssets: {
+      propertyModelUrl: {
+        type: String,
+        trim: true,
+        default: ''
+      },
+      floorPlanModelUrl: {
+        type: String,
+        trim: true,
+        default: ''
+      },
+      furnitureCatalog: [
+        {
+          furnitureId: { type: String, trim: true, default: '' },
+          name: { type: String, trim: true, default: '' },
+          category: { type: String, trim: true, default: 'general' },
+          modelUrl: { type: String, trim: true, default: '' },
+          thumbnailUrl: { type: String, trim: true, default: '' },
+          color: { type: String, trim: true, default: '#0f4c81' },
+          dimensions: {
+            width: { type: Number, default: 80, min: 20, max: 300 },
+            depth: { type: Number, default: 50, min: 20, max: 300 },
+            height: { type: Number, default: 40, min: 5, max: 300 }
+          }
+        }
+      ],
+      roomTemplates: [
+        {
+          roomId: { type: String, trim: true, default: '' },
+          name: { type: String, trim: true, default: '' },
+          type: { type: String, trim: true, default: 'room' },
+          width: { type: Number, default: 12, min: 4, max: 40 },
+          length: { type: Number, default: 12, min: 4, max: 40 },
+          hasBalcony: { type: Boolean, default: false }
+        }
+      ]
+    },
     location: {
       address: { type: String, trim: true, default: '' },
       area: { type: String, trim: true, default: '' },

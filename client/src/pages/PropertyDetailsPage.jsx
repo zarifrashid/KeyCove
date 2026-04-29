@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import NeighbourhoodInsightsSection from '../components/neighbourhood/NeighbourhoodInsightsSection'
 import { api } from '../lib/api'
@@ -8,6 +8,7 @@ import useFavorites from '../hooks/useFavorites'
 import PropertyAffordabilityWidget from '../components/affordability/PropertyAffordabilityWidget'
 import PropertyMortgageWidget from '../components/mortgage/PropertyMortgageWidget'
 import BoardPickerModal from '../components/sharedBoards/BoardPickerModal'
+import ARPropertyViewer from '../components/ar/ARPropertyViewer'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -112,6 +113,7 @@ function DetailsRow({ label, value }) {
 export default function PropertyDetailsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const { favoriteIds, toggleFavorite } = useFavorites()
   const { id } = useParams()
   const [property, setProperty] = useState(null)
@@ -123,7 +125,9 @@ export default function PropertyDetailsPage() {
   const [contactState, setContactState] = useState({ loading: false, error: '' })
   const [actionMenuOpen, setActionMenuOpen] = useState(false)
   const [showSharedBoardModal, setShowSharedBoardModal] = useState(false)
+  const [showARViewer, setShowARViewer] = useState(false)
   const insightsRef = useRef(null)
+  const arViewerRef = useRef(null)
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -143,6 +147,16 @@ export default function PropertyDetailsPage() {
     if (!showInsights || !insightsRef.current) return
     insightsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [showInsights])
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    if (searchParams.get('ar') === '1') setShowARViewer(true)
+  }, [location.search])
+
+  useEffect(() => {
+    if (!showARViewer || !arViewerRef.current) return
+    arViewerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [showARViewer])
 
   useEffect(() => {
     const fetchAffordability = async () => {
@@ -302,6 +316,7 @@ export default function PropertyDetailsPage() {
                           Shared Search
                         </button>
                       ) : null}
+                      <button type="button" className="primary-btn ar-view-button" onClick={() => setShowARViewer(true)}>Design Rooms</button>
                       <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
                       {user?.role === 'tenant' ? (
                         <>
@@ -353,6 +368,12 @@ export default function PropertyDetailsPage() {
                 </div>
                 <p className="property-body-copy">{property.description}</p>
               </section>
+
+              {showARViewer ? (
+                <div ref={arViewerRef}>
+                  <ARPropertyViewer property={property} user={user} onClose={() => setShowARViewer(false)} />
+                </div>
+              ) : null}
 
               <section className="card property-section-card">
                 <div className="property-section-heading">

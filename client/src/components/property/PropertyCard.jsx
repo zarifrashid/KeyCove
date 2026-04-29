@@ -53,6 +53,9 @@ export default function PropertyCard({
               savedLabel={bookmarkSavedLabel}
             />
           ) : null}
+          <Link to={`/properties/${property._id}?ar=1`} className="secondary-btn ar-card-btn" onClick={(event) => event.stopPropagation()}>
+            Design Rooms
+          </Link>
           <Link to={`/properties/${property._id}`} className="primary-btn" onClick={(event) => event.stopPropagation()}>
             View Details
           </Link>
