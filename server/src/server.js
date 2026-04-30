@@ -18,6 +18,8 @@ import arSessionRoutes from './routes/arSessionRoutes.js'
 import decisionHubRoutes from './routes/decisionHubRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import managerVerificationRoutes from './routes/managerVerificationRoutes.js'
+import notificationRoutes from './routes/notificationRoutes.js'
+import { startLeaseNotificationScheduler } from './services/notifications/leaseNotificationScheduler.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -64,10 +66,12 @@ app.use('/api/ar-session', arSessionRoutes)
 app.use('/api/decision-hub', decisionHubRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/manager-verifications', managerVerificationRoutes)
+app.use('/api/notifications', notificationRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
+    startLeaseNotificationScheduler()
   })
 })

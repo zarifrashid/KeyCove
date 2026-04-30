@@ -3,6 +3,7 @@ import { protect, authorizeRoles } from '../middleware/authMiddleware.js'
 import {
   changeUserRole,
   createAdminUser,
+  createAnnouncement,
   getAdminOverview,
   listManagerVerifications,
   listRoleAssignments,
@@ -21,6 +22,7 @@ router.use(authorizeRoles('admin'))
 router.get('/overview', getAdminOverview)
 router.get('/users', listUsers)
 router.post('/users/create-admin', createAdminUser)
+router.post('/announcements', createAnnouncement)
 router.patch('/users/:id/suspend', suspendUser)
 router.patch('/users/:id/restore', restoreUser)
 router.delete('/users/:id', softDeleteUser)

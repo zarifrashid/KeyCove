@@ -2,6 +2,7 @@ import Lease from '../models/Lease.js'
 import Property from '../models/Property.js'
 import PropertyRequest from '../models/PropertyRequest.js'
 import User from '../models/User.js'
+import { createNotification } from '../services/notifications/notificationService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -309,6 +310,18 @@ export async function createLease(req, res) {
       notes
     })
 
+    await createNotification({
+      userId: tenantId,
+      actorId: req.user.userId,
+      title: 'Lease created',
+      body: `A lease was created for ${lease?.property?.title || 'your property'}.`,
+      type: 'lease',
+      relatedEntityType: 'lease',
+      relatedEntityId: lease._id,
+      actionUrl: `/leases/${lease._id}`,
+      priority: 'high'
+    })
+
     return res.status(201).json({
       success: true,
       message: 'Lease created successfully.',
@@ -368,6 +381,18 @@ export async function createLeaseFromRequest(req, res) {
       notes: body.notes || requestDoc.note || ''
     })
 
+    await createNotification({
+      userId: requestDoc.tenant,
+      actorId: req.user.userId,
+      title: 'Lease created from approved request',
+      body: `A lease was created for ${lease?.property?.title || 'your approved property'}.`,
+      type: 'lease',
+      relatedEntityType: 'lease',
+      relatedEntityId: lease._id,
+      actionUrl: `/leases/${lease._id}`,
+      priority: 'high'
+    })
+
     return res.status(201).json({
       success: true,
       message: 'Lease created from approved request successfully.',
@@ -401,6 +426,15 @@ export async function updateLeaseStatus(req, res) {
       return res.status(403).json({ message: 'You can only update leases for your own properties.' })
     }
 
+    if (lease.status === status) {
+      const populatedLease = await populateLeaseQuery(Lease.findById(lease._id)).lean()
+      return res.status(200).json({
+        success: true,
+        message: 'Lease status is already up to date.',
+        lease: mapLease(populatedLease)
+      })
+    }
+
     if (status === 'active') {
       const openLease = await findOpenLeaseForProperty(lease.property, lease._id)
       if (openLease) {
@@ -412,6 +446,18 @@ export async function updateLeaseStatus(req, res) {
     await lease.save()
 
     const populatedLease = await populateLeaseQuery(Lease.findById(lease._id)).lean()
+
+    await createNotification({
+      userId: lease.tenant,
+      actorId: req.user.userId,
+      title: 'Lease status updated',
+      body: `Your lease for ${populatedLease?.property?.title || 'your property'} is now ${status}.`,
+      type: 'lease',
+      relatedEntityType: 'lease',
+      relatedEntityId: lease._id,
+      actionUrl: `/leases/${lease._id}`,
+      priority: status === 'terminated' || status === 'expired' ? 'high' : 'normal'
+    })
 
     return res.status(200).json({
       success: true,

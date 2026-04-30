@@ -3,6 +3,7 @@ import {
   createPropertyRequest,
   getApprovedTenantProperties,
   getPropertyRequestPrefill,
+  getPropertyRequestById,
   getManagerRequests,
   getMyTenantRequests,
   updatePropertyRequestStatus,
@@ -17,6 +18,7 @@ router.post('/', protect, authorizeRoles('tenant'), createPropertyRequest)
 router.get('/mine', protect, authorizeRoles('tenant'), getMyTenantRequests)
 router.get('/mine/properties', protect, authorizeRoles('tenant'), getApprovedTenantProperties)
 router.get('/manager', protect, authorizeRoles('manager'), getManagerRequests)
+router.get('/:id', protect, getPropertyRequestById)
 router.patch('/:id/status', protect, authorizeRoles('manager'), updatePropertyRequestStatus)
 router.patch('/:id/occupancy-status', protect, authorizeRoles('tenant'), updateTenantOccupancyStatus)
 

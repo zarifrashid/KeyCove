@@ -1,10 +1,13 @@
 import jwt from 'jsonwebtoken'
 import Property from '../models/Property.js'
+import PropertyRequest from '../models/PropertyRequest.js'
+import Favorite from '../models/Favorite.js'
 import SearchQuery from '../models/SearchQuery.js'
 import { buildPropertyFilter, extractSearchSnapshot } from '../utils/searchFilters.js'
 import { buildSortOption, normalizeSortOption } from '../utils/searchSort.js'
 import { deleteNeighbourhoodInsightForProperty, generateNeighbourhoodInsightForProperty } from '../services/neighbourhood/insightGenerator.js'
 import { logInteraction } from '../services/recommendations/interactionService.js'
+import { createBulkNotificationsForUsers, getAdminIds } from '../services/notifications/notificationService.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -305,6 +308,24 @@ async function syncNeighbourhoodInsight(property) {
   await generateNeighbourhoodInsightForProperty(property).catch(() => null)
 }
 
+
+async function getPropertyInterestedTenantIds(propertyId, { includeFavorites = true } = {}) {
+  const [requests, favorites] = await Promise.all([
+    PropertyRequest.find({
+      property: propertyId,
+      status: { $in: ['pending', 'approved'] }
+    }).select('tenant'),
+    includeFavorites ? Favorite.find({ property: propertyId }).select('tenant user') : []
+  ])
+
+  return [
+    ...new Set([
+      ...requests.map((item) => item.tenant?.toString()).filter(Boolean),
+      ...favorites.map((item) => (item.tenant || item.user)?.toString()).filter(Boolean)
+    ])
+  ]
+}
+
 async function logSearchQuery({ req, total, page, limit, sortOption, source, zoom }) {
   const snapshot = extractSearchSnapshot(req.query)
 
@@ -489,6 +510,20 @@ export async function createProperty(req, res) {
     const property = await Property.create(payload)
     await syncNeighbourhoodInsight(property)
 
+    if (payload.status === 'active') {
+      const adminIds = await getAdminIds({ exceptUserId: req.user.userId })
+      await createBulkNotificationsForUsers(adminIds, {
+        actorId: req.user.userId,
+        title: 'New property published',
+        body: `${property.title} was published and may need platform review.`,
+        type: 'system',
+        relatedEntityType: 'property',
+        relatedEntityId: property._id,
+        actionUrl: `/properties/${property._id}`,
+        priority: 'normal'
+      })
+    }
+
     res.status(201).json({
       success: true,
       message: payload.status === 'active' ? 'Property published successfully.' : 'Property saved as draft.',
@@ -511,6 +546,11 @@ export async function updateProperty(req, res) {
       return res.status(403).json({ message: 'You can only update your own property listings.' })
     }
 
+    const previousStatus = existingProperty.status
+    const previousPrice = existingProperty.price
+    const previousSalePrice = existingProperty.salePrice
+    const previousRentPrice = existingProperty.rentPrice
+
     const rawPayload = extractBody(req)
     const payload = buildPropertyPayload(rawPayload, existingProperty, req.user.userId)
 
@@ -524,6 +564,39 @@ export async function updateProperty(req, res) {
     Object.assign(existingProperty, payload)
     await existingProperty.save()
     await syncNeighbourhoodInsight(existingProperty)
+
+    if (previousStatus !== 'active' && existingProperty.status === 'active') {
+      const adminIds = await getAdminIds({ exceptUserId: req.user.userId })
+      await createBulkNotificationsForUsers(adminIds, {
+        actorId: req.user.userId,
+        title: 'Property published',
+        body: `${existingProperty.title} was published and may need platform review.`,
+        type: 'system',
+        relatedEntityType: 'property',
+        relatedEntityId: existingProperty._id,
+        actionUrl: `/properties/${existingProperty._id}`,
+        priority: 'normal'
+      })
+    }
+
+    const priceChanged =
+      Number(previousPrice || 0) !== Number(existingProperty.price || 0) ||
+      Number(previousSalePrice || 0) !== Number(existingProperty.salePrice || 0) ||
+      Number(previousRentPrice || 0) !== Number(existingProperty.rentPrice || 0)
+
+    if (priceChanged && existingProperty.status === 'active') {
+      const tenantIds = await getPropertyInterestedTenantIds(existingProperty._id)
+      await createBulkNotificationsForUsers(tenantIds, {
+        actorId: req.user.userId,
+        title: 'Property price updated',
+        body: `${existingProperty.title} has updated pricing.`,
+        type: 'system',
+        relatedEntityType: 'property',
+        relatedEntityId: existingProperty._id,
+        actionUrl: `/properties/${existingProperty._id}`,
+        priority: 'normal'
+      })
+    }
 
     res.status(200).json({
       success: true,
@@ -547,9 +620,21 @@ export async function deleteProperty(req, res) {
       return res.status(403).json({ message: 'You can only delete your own property listings.' })
     }
 
+    const tenantIds = await getPropertyInterestedTenantIds(property._id)
     property.status = 'deleted'
     await property.save()
     await deleteNeighbourhoodInsightForProperty(property._id).catch(() => null)
+
+    await createBulkNotificationsForUsers(tenantIds, {
+      actorId: req.user.userId,
+      title: 'Property no longer available',
+      body: `${property.title} was removed from KeyCove.`,
+      type: 'system',
+      relatedEntityType: 'property',
+      relatedEntityId: property._id,
+      actionUrl: '/dashboard',
+      priority: 'high'
+    })
 
     res.status(200).json({
       success: true,

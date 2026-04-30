@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import NotificationBell from './notifications/NotificationBell'
 
 export default function Navbar({ unreadMessages = 0 }) {
   const { user, logout } = useAuth()
@@ -47,6 +48,8 @@ export default function Navbar({ unreadMessages = 0 }) {
               Shared Search
             </Link>
           ) : null}
+
+          <NotificationBell compact />
 
           <Link to="/messages" className="explore-nav-link">
             Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}
@@ -98,6 +101,8 @@ export default function Navbar({ unreadMessages = 0 }) {
             {user?.role === 'tenant' ? <Link to="/shared-boards">Shared Search</Link> : null}
 
             {user?.role === 'admin' ? <Link to="/admin">Admin Center</Link> : null}
+
+            <NotificationBell />
 
             <Link to="/messages">
               Messages{unreadMessages > 0 ? ` (${unreadMessages})` : ''}

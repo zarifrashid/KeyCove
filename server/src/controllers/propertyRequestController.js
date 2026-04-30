@@ -3,6 +3,7 @@ import PropertyRequest from '../models/PropertyRequest.js'
 import TenantPropertyRecord from '../models/TenantPropertyRecord.js'
 import ManagerDecision from '../models/ManagerDecision.js'
 import User from '../models/User.js'
+import { buildRequestActionLabel, createNotification } from '../services/notifications/notificationService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -140,6 +141,15 @@ async function safeUpsertTenantPropertyRecord(request) {
   } catch (_) {
     // Intentionally ignored so approve never fails because of tracking sync
   }
+}
+
+
+function getPropertyTitleFromRequest(request) {
+  return request?.property?.title || 'this property'
+}
+
+function getRequestDetailsActionUrl(requestId) {
+  return `/property-requests/${requestId}`
 }
 
 async function safeSyncOccupancyRecord(request) {
@@ -385,6 +395,18 @@ export async function createPropertyRequest(req, res) {
 
     const populatedRequest = await populateRequestById(request._id)
 
+    await createNotification({
+      userId: property.manager._id,
+      actorId: req.user.userId,
+      title: `New ${actionType} request`,
+      body: `${req.user.name || 'A tenant'} sent a ${actionType} request for ${property.title}.`,
+      type: 'application',
+      relatedEntityType: 'propertyRequest',
+      relatedEntityId: request._id,
+      actionUrl: getRequestDetailsActionUrl(request._id),
+      priority: 'high'
+    })
+
     res.status(201).json({
       success: true,
       message: 'Request sent to the manager successfully.',
@@ -392,6 +414,35 @@ export async function createPropertyRequest(req, res) {
     })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to submit the property request.' })
+  }
+}
+
+export async function getPropertyRequestById(req, res) {
+  try {
+    const request = await populateRequestById(req.params.id)
+
+    if (!request) {
+      return res.status(404).json({ message: 'Property request not found.' })
+    }
+
+    const tenantId = request.tenant?._id?.toString?.() || request.tenant?.toString?.()
+    const managerId = request.manager?._id?.toString?.() || request.manager?.toString?.()
+
+    const canView =
+      req.user.role === 'admin' ||
+      tenantId === req.user.userId ||
+      managerId === req.user.userId
+
+    if (!canView) {
+      return res.status(403).json({ message: 'You cannot view this property request.' })
+    }
+
+    res.status(200).json({
+      success: true,
+      request: mapRequest(request)
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Failed to load property request.' })
   }
 }
 
@@ -455,6 +506,15 @@ export async function updatePropertyRequestStatus(req, res) {
       return res.status(403).json({ message: 'You can only review requests for your own properties.' })
     }
 
+    if (request.status === status) {
+      const populatedRequest = await populateRequestById(request._id)
+      return res.status(200).json({
+        success: true,
+        message: 'Request status is already up to date.',
+        request: mapRequest(populatedRequest)
+      })
+    }
+
     const now = new Date()
 
     request.status = status
@@ -477,6 +537,20 @@ export async function updatePropertyRequestStatus(req, res) {
     await safeUpsertTenantPropertyRecord(request)
 
     const populatedRequest = await populateRequestById(request._id)
+    const actionLabel = buildRequestActionLabel(populatedRequest?.actionType || request.actionType)
+    const propertyTitle = getPropertyTitleFromRequest(populatedRequest)
+
+    await createNotification({
+      userId: request.tenant,
+      actorId: req.user.userId,
+      title: `${actionLabel} ${status}`,
+      body: `Your ${String(populatedRequest?.actionType || request.actionType)} request for ${propertyTitle} was ${status}.`,
+      type: 'application',
+      relatedEntityType: 'propertyRequest',
+      relatedEntityId: request._id,
+      actionUrl: getRequestDetailsActionUrl(request._id),
+      priority: status === 'approved' ? 'high' : 'normal'
+    })
 
     return res.status(200).json({
       success: true,
@@ -538,6 +612,15 @@ export async function updateTenantOccupancyStatus(req, res) {
       return res.status(400).json({ message: 'Only approved applications can be tracked here.' })
     }
 
+    if (request.occupancyStatus === occupancyStatus) {
+      const populatedRequest = await populateRequestById(request._id)
+      return res.status(200).json({
+        success: true,
+        message: `Property is already marked as ${occupancyStatus}.`,
+        propertyRecord: mapRequest(populatedRequest)
+      })
+    }
+
     request.occupancyStatus = occupancyStatus
     request.occupancyUpdatedAt = new Date()
 
@@ -545,6 +628,18 @@ export async function updateTenantOccupancyStatus(req, res) {
     await safeSyncOccupancyRecord(request)
 
     const populatedRequest = await populateRequestById(request._id)
+    const propertyTitle = getPropertyTitleFromRequest(populatedRequest)
+
+    await createNotification({
+      userId: request.manager,
+      actorId: req.user.userId,
+      title: 'Tenant property status updated',
+      body: `${req.user.name || 'A tenant'} marked ${propertyTitle} as ${occupancyStatus}.`,
+      type: 'application',
+      relatedEntityType: 'propertyRequest',
+      relatedEntityId: request._id,
+      actionUrl: getRequestDetailsActionUrl(request._id)
+    })
 
     res.status(200).json({
       success: true,

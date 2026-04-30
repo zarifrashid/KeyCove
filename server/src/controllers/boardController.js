@@ -9,6 +9,7 @@ import Property from '../models/Property.js'
 import User from '../models/User.js'
 import { emitBoardEventToUsers, registerBoardStream, removeBoardStream } from '../services/boards/realtime.js'
 import { isBoardOwner, requireBoardAccess, userIdsMatch } from '../utils/boardAccess.js'
+import { createBulkNotificationsForUsers as createGlobalNotificationsForUsers } from '../services/notifications/notificationService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -139,6 +140,17 @@ async function createNotifications({ boardId, recipients, actorId = null, type, 
       relatedEntityId
     }))
   )
+
+  await createGlobalNotificationsForUsers(uniqueRecipients, {
+    actorId,
+    title,
+    body,
+    type: 'system',
+    relatedEntityType: 'sharedBoard',
+    relatedEntityId: boardId,
+    actionUrl: `/shared-boards/${boardId}`,
+    priority: type === 'invite' ? 'high' : 'normal'
+  })
 
   emitBoardEventToUsers(uniqueRecipients, 'board:activityUpdated', {
     boardId: String(boardId),
