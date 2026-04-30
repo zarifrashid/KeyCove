@@ -19,6 +19,8 @@ import SharedBoardsPage from './pages/SharedBoardsPage'
 import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import DecisionHubPage from './pages/DecisionHubPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
+import NotificationsPage from './pages/NotificationsPage'
+import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -143,6 +145,30 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications/announcements/:announcementId"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/property-requests/:id"
+        element={
+          <ProtectedRoute>
+            <PropertyRequestDetailsPage />
           </ProtectedRoute>
         }
       />

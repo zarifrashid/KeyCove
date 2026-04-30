@@ -1,5 +1,6 @@
 import ManagerVerification from '../models/ManagerVerification.js'
 import User from '../models/User.js'
+import { createNotificationsForUsers, getAdminIds } from '../services/notifications/notificationService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -79,6 +80,18 @@ export async function submitManagerVerification(req, res) {
     const populatedVerification = await ManagerVerification.findById(verification._id)
       .populate('reviewedByAdmin', 'name email role')
       .lean()
+
+    const adminIds = await getAdminIds()
+    await createNotificationsForUsers(adminIds, {
+      actorId: req.user.userId,
+      title: 'New manager verification request',
+      body: `${cleanedCompanyName} submitted documents for admin review.`,
+      type: 'system',
+      relatedEntityType: 'managerVerification',
+      relatedEntityId: verification._id,
+      actionUrl: '/admin',
+      priority: 'high'
+    })
 
     res.status(201).json({
       success: true,

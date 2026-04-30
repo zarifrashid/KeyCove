@@ -7,6 +7,13 @@ import Conversation from '../models/Conversation.js'
 import Favorite from '../models/Favorite.js'
 import ManagerVerification from '../models/ManagerVerification.js'
 import RoleAssignment from '../models/RoleAssignment.js'
+import Announcement from '../models/Announcement.js'
+import {
+  createBulkNotificationsForUsers,
+  createNotification,
+  getAdminIds,
+  getUserIdsByRole
+} from '../services/notifications/notificationService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -193,6 +200,32 @@ export async function createAdminUser(req, res) {
       }
     })
 
+    await createNotification({
+      userId: admin._id,
+      actorId: req.user.userId,
+      title: 'Admin account created',
+      body: 'Your KeyCove admin account has been created.',
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: admin._id,
+      actionUrl: '/admin',
+      priority: 'high',
+      skipActor: false
+    })
+
+    const otherAdminIds = (await getAdminIds({ exceptUserId: req.user.userId }))
+      .filter((adminId) => adminId !== admin._id.toString())
+    await createBulkNotificationsForUsers(otherAdminIds, {
+      actorId: req.user.userId,
+      title: 'New admin account created',
+      body: `${admin.name} was added as a KeyCove admin.`,
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: admin._id,
+      actionUrl: '/admin',
+      priority: 'normal'
+    })
+
     res.status(201).json({
       success: true,
       message: 'Admin account created successfully.',
@@ -222,6 +255,21 @@ export async function suspendUser(req, res) {
 
     if (!user) return res.status(404).json({ message: 'User not found.' })
 
+    await createNotification({
+      userId: user._id,
+      actorId: req.user.userId,
+      title: 'Account suspended',
+      body: normalizeString(req.body?.reason)
+        ? `Your KeyCove account was suspended. Reason: ${normalizeString(req.body?.reason)}`
+        : 'Your KeyCove account was suspended by an admin.',
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: user._id,
+      actionUrl: '/login',
+      priority: 'high',
+      skipActor: false
+    })
+
     res.status(200).json({ success: true, message: 'User suspended.', user: sanitizeUser(user) })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to suspend user.' })
@@ -244,6 +292,19 @@ export async function restoreUser(req, res) {
     ).select('-password')
 
     if (!user) return res.status(404).json({ message: 'User not found.' })
+
+    await createNotification({
+      userId: user._id,
+      actorId: req.user.userId,
+      title: 'Account restored',
+      body: 'Your KeyCove account was restored by an admin.',
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: user._id,
+      actionUrl: '/dashboard',
+      priority: 'high',
+      skipActor: false
+    })
 
     res.status(200).json({ success: true, message: 'User restored.', user: sanitizeUser(user) })
   } catch (error) {
@@ -268,6 +329,19 @@ export async function softDeleteUser(req, res) {
     ).select('-password')
 
     if (!user) return res.status(404).json({ message: 'User not found.' })
+
+    await createNotification({
+      userId: user._id,
+      actorId: req.user.userId,
+      title: 'Account removed',
+      body: 'Your KeyCove account was removed by an admin.',
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: user._id,
+      actionUrl: '/login',
+      priority: 'high',
+      skipActor: false
+    })
 
     res.status(200).json({ success: true, message: 'User soft-deleted.', user: sanitizeUser(user) })
   } catch (error) {
@@ -315,6 +389,19 @@ export async function changeUserRole(req, res) {
       newRole: nextRole,
       assignedBy: req.user.userId,
       reason
+    })
+
+    await createNotification({
+      userId: user._id,
+      actorId: req.user.userId,
+      title: 'Role updated',
+      body: `Your KeyCove role was changed from ${previousRole} to ${nextRole}.`,
+      type: 'system',
+      relatedEntityType: 'user',
+      relatedEntityId: user._id,
+      actionUrl: '/dashboard',
+      priority: 'high',
+      skipActor: false
     })
 
     res.status(200).json({ success: true, message: 'User role updated.', user: sanitizeUser(user) })
@@ -389,6 +476,19 @@ export async function reviewManagerVerification(req, res) {
       return res.status(404).json({ message: 'Verification request not found.' })
     }
 
+    if (verification.status === status) {
+      const populatedVerification = await ManagerVerification.findById(verification._id)
+        .populate('manager', 'name email role phone companyName isManagerVerified managerVerificationStatus accountStatus')
+        .populate('reviewedByAdmin', 'name email role')
+        .lean()
+
+      return res.status(200).json({
+        success: true,
+        message: 'Manager verification status is already up to date.',
+        verification: populatedVerification
+      })
+    }
+
     verification.status = status
     verification.adminNote = adminNote
     verification.reviewedByAdmin = req.user.userId
@@ -408,6 +508,21 @@ export async function reviewManagerVerification(req, res) {
       .populate('reviewedByAdmin', 'name email role')
       .lean()
 
+    await createNotification({
+      userId: verification.manager,
+      actorId: req.user.userId,
+      title: status === 'verified' ? 'Manager verification approved' : 'Manager verification rejected',
+      body: adminNote || (status === 'verified'
+        ? 'Your manager account is now verified.'
+        : 'Your manager verification was rejected. Please review the admin note and resubmit if needed.'),
+      type: 'system',
+      relatedEntityType: 'managerVerification',
+      relatedEntityId: verification._id,
+      actionUrl: '/dashboard',
+      priority: 'high',
+      skipActor: false
+    })
+
     res.status(200).json({
       success: true,
       message: status === 'verified' ? 'Manager verified successfully.' : 'Manager verification rejected.',
@@ -415,5 +530,64 @@ export async function reviewManagerVerification(req, res) {
     })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to review manager verification.' })
+  }
+}
+
+
+export async function createAnnouncement(req, res) {
+  try {
+    const {
+      title,
+      message,
+      targetRole = 'all',
+      priority = 'normal',
+      expiresAt
+    } = req.body || {}
+
+    const cleanedTitle = normalizeString(title)
+    const cleanedMessage = normalizeString(message)
+    const cleanedTargetRole = ['all', 'tenant', 'manager', 'admin'].includes(targetRole) ? targetRole : 'all'
+    const cleanedPriority = ['low', 'normal', 'high', 'critical'].includes(priority) ? priority : 'normal'
+
+    if (!cleanedTitle || !cleanedMessage) {
+      return res.status(400).json({ message: 'Title and message are required.' })
+    }
+
+    const parsedExpiresAt = expiresAt ? new Date(expiresAt) : null
+    if (expiresAt && Number.isNaN(parsedExpiresAt.getTime())) {
+      return res.status(400).json({ message: 'Expiration date must be valid.' })
+    }
+
+    const announcement = await Announcement.create({
+      title: cleanedTitle,
+      message: cleanedMessage,
+      targetRole: cleanedTargetRole,
+      priority: cleanedPriority,
+      expiresAt: parsedExpiresAt,
+      createdByAdmin: req.user.userId
+    })
+
+    const userIds = await getUserIdsByRole(cleanedTargetRole)
+
+    await createBulkNotificationsForUsers(userIds, {
+      actorId: req.user.userId,
+      title: cleanedTitle,
+      body: cleanedMessage,
+      type: 'announcement',
+      relatedEntityType: 'announcement',
+      relatedEntityId: announcement._id,
+      actionUrl: `/notifications/announcements/${announcement._id}`,
+      priority: cleanedPriority,
+      skipActor: false
+    })
+
+    res.status(201).json({
+      success: true,
+      message: 'Announcement sent successfully.',
+      announcement,
+      notifiedUsers: userIds.length
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Failed to send announcement.' })
   }
 }

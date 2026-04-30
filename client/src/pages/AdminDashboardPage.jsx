@@ -30,6 +30,14 @@ const ADMIN_FORM_INITIAL = {
   accessLevel: '1'
 }
 
+const ANNOUNCEMENT_FORM_INITIAL = {
+  title: '',
+  message: '',
+  targetRole: 'all',
+  priority: 'high',
+  expiresAt: ''
+}
+
 function getUserId(user) {
   return user?._id || user?.id
 }
@@ -52,6 +60,7 @@ export default function AdminDashboardPage() {
   const [filters, setFilters] = useState({ search: '', role: '', status: '' })
   const [verificationFilter, setVerificationFilter] = useState('')
   const [adminForm, setAdminForm] = useState(ADMIN_FORM_INITIAL)
+  const [announcementForm, setAnnouncementForm] = useState(ANNOUNCEMENT_FORM_INITIAL)
   const [state, setState] = useState({ loading: true, actionId: '', error: '', message: '' })
 
   const overviewItems = useMemo(() => {
@@ -221,6 +230,27 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const handleAnnouncementChange = (event) => {
+    const { name, value } = event.target
+    setAnnouncementForm((previous) => ({ ...previous, [name]: value }))
+  }
+
+  const handleSendAnnouncement = async (event) => {
+    event.preventDefault()
+    try {
+      setState((previous) => ({ ...previous, actionId: 'send-announcement', error: '', message: '' }))
+      const payload = {
+        ...announcementForm,
+        expiresAt: announcementForm.expiresAt || undefined
+      }
+      const { data } = await api.post('/admin/announcements', payload)
+      setAnnouncementForm(ANNOUNCEMENT_FORM_INITIAL)
+      showMessage(`Announcement sent to ${data.notifiedUsers || 0} user(s).`)
+    } catch (error) {
+      showError(error, 'Failed to send announcement.')
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -239,6 +269,7 @@ export default function AdminDashboardPage() {
           <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>Overview</button>
           <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Users & Roles</button>
           <button className={activeTab === 'verifications' ? 'active' : ''} onClick={() => setActiveTab('verifications')}>Manager Verification</button>
+          <button className={activeTab === 'announcements' ? 'active' : ''} onClick={() => setActiveTab('announcements')}>Broadcast</button>
           <button className={activeTab === 'createAdmin' ? 'active' : ''} onClick={() => setActiveTab('createAdmin')}>Create Admin</button>
         </div>
 
@@ -413,6 +444,50 @@ export default function AdminDashboardPage() {
 
               {!verifications.length ? <p>No manager verification requests found.</p> : null}
             </div>
+          </section>
+        ) : null}
+
+        {activeTab === 'announcements' ? (
+          <section className="card admin-panel-card admin-create-card">
+            <h2>Broadcast Announcement</h2>
+            <p>Send important platform messages to all users or a selected role. Online users receive a toast and everyone gets a bell notification.</p>
+            <form className="manager-verification-form announcement-form" onSubmit={handleSendAnnouncement}>
+              <div className="form-grid two-col-form-grid">
+                <label>
+                  Title
+                  <input name="title" value={announcementForm.title} onChange={handleAnnouncementChange} required maxLength="160" placeholder="Yearly Maintenance Notice" />
+                </label>
+                <label>
+                  Target Role
+                  <select name="targetRole" value={announcementForm.targetRole} onChange={handleAnnouncementChange}>
+                    <option value="all">All Users</option>
+                    <option value="tenant">Tenants Only</option>
+                    <option value="manager">Managers Only</option>
+                    <option value="admin">Admins Only</option>
+                  </select>
+                </label>
+                <label>
+                  Priority
+                  <select name="priority" value={announcementForm.priority} onChange={handleAnnouncementChange}>
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </label>
+                <label>
+                  Expires At
+                  <input name="expiresAt" type="datetime-local" value={announcementForm.expiresAt} onChange={handleAnnouncementChange} />
+                </label>
+                <label className="form-grid-wide">
+                  Message
+                  <textarea name="message" value={announcementForm.message} onChange={handleAnnouncementChange} required maxLength="1500" rows="5" placeholder="KeyCove will be unavailable for 2 days due to yearly maintenance." />
+                </label>
+              </div>
+              <button type="submit" className="primary-btn" disabled={state.actionId === 'send-announcement'}>
+                {state.actionId === 'send-announcement' ? 'Sending...' : 'Send Announcement'}
+              </button>
+            </form>
           </section>
         ) : null}
 

@@ -3,6 +3,7 @@ import Message from '../models/Message.js'
 import Property from '../models/Property.js'
 import { emitToUsers, registerChatStream, removeChatStream } from '../services/chat/realtime.js'
 import { getViewerRoleInConversation, isConversationParticipant } from '../utils/chatAccess.js'
+import { createNotification } from '../services/notifications/notificationService.js'
 
 function getConversationUnreadForUser(conversation, userId) {
   const viewerRole = getViewerRoleInConversation(conversation, userId)
@@ -246,6 +247,21 @@ export async function sendMessage(req, res) {
       conversationId: conversation._id,
       message: mapMessage(populatedMessage)
     })
+
+    const recipientId = viewerRole === 'tenant' ? managerId : tenantId
+    const propertyTitle = conversation.property?.title || 'this property'
+    const senderName = req.user.name || 'Someone'
+    await createNotification({
+      userId: recipientId,
+      actorId: req.user.userId,
+      title: 'New message',
+      body: `${senderName} sent you a message about ${propertyTitle}.`,
+      type: 'message',
+      relatedEntityType: 'conversation',
+      relatedEntityId: conversation._id,
+      actionUrl: `/messages?conversation=${conversation._id}`
+    })
+
     await emitConversationRefresh(conversation._id)
 
     res.status(201).json({ message: mapMessage(populatedMessage) })
