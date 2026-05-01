@@ -92,6 +92,7 @@ export default function Navbar({ unreadMessages = 0 }) {
 
             {user?.role === 'manager' ? <Link to="/add-property">Add Property</Link> : null}
             {user?.role === 'manager' ? <Link to="/manager/leases">Lease Details</Link> : null}
+            {user?.role === 'manager' ? <Link to="/manager/analytics">Analytics</Link> : null}
 
             {user?.role === 'tenant' ? <Link to="/my-leases">My Leases</Link> : null}
             {user?.role === 'tenant' ? <Link to="/affordability">Affordability</Link> : null}

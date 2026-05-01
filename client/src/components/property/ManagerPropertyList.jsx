@@ -55,6 +55,9 @@ export default function ManagerPropertyList({ properties, onDelete, deletingId }
               <Link to={`/properties/${property._id}/edit`} className="secondary-btn">
                 Edit
               </Link>
+              <Link to={`/manager/properties/${property._id}/analytics`} className="secondary-btn">
+                Analytics
+              </Link>
               {property.status === 'active' ? (
                 <Link to={`/properties/${property._id}`} className="secondary-btn">
                   View

@@ -20,6 +20,8 @@ import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import DecisionHubPage from './pages/DecisionHubPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import NotificationsPage from './pages/NotificationsPage'
+import ManagerAnalyticsPage from './pages/ManagerAnalyticsPage'
+import ManagerPropertyAnalyticsPage from './pages/ManagerPropertyAnalyticsPage'
 import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
 import { useAuth } from './context/AuthContext'
 
@@ -145,6 +147,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/analytics"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <ManagerAnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/properties/:propertyId/analytics"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <ManagerPropertyAnalyticsPage />
           </ProtectedRoute>
         }
       />

@@ -4,6 +4,7 @@ import Property from '../models/Property.js'
 import { emitToUsers, registerChatStream, removeChatStream } from '../services/chat/realtime.js'
 import { getViewerRoleInConversation, isConversationParticipant } from '../utils/chatAccess.js'
 import { createNotification } from '../services/notifications/notificationService.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 function getConversationUnreadForUser(conversation, userId) {
   const viewerRole = getViewerRoleInConversation(conversation, userId)
@@ -219,6 +220,11 @@ export async function sendMessage(req, res) {
       return res.status(400).json({ message: 'Message content cannot be empty.' })
     }
 
+    const viewerRole = getViewerRoleInConversation(conversation, req.user.userId)
+    const previousTenantMessageCount = viewerRole === 'tenant'
+      ? await Message.countDocuments({ conversation: conversation._id, sender: req.user.userId })
+      : 0
+
     const message = await Message.create({
       conversation: conversation._id,
       sender: req.user.userId,
@@ -227,7 +233,6 @@ export async function sendMessage(req, res) {
       sentAt: new Date()
     })
 
-    const viewerRole = getViewerRoleInConversation(conversation, req.user.userId)
     if (viewerRole === 'tenant') {
       conversation.unreadCountManager = (conversation.unreadCountManager || 0) + 1
     } else {
@@ -261,6 +266,17 @@ export async function sendMessage(req, res) {
       relatedEntityId: conversation._id,
       actionUrl: `/messages?conversation=${conversation._id}`
     })
+
+    if (viewerRole === 'tenant' && previousTenantMessageCount === 0 && conversation.property?._id) {
+      await trackPropertyEvent({
+        propertyId: conversation.property._id,
+        userId: req.user.userId,
+        eventType: 'message_inquiry',
+        metadata: {
+          conversationId: conversation._id
+        }
+      }).catch(() => null)
+    }
 
     await emitConversationRefresh(conversation._id)
 
@@ -314,6 +330,7 @@ export async function markConversationAsRead(req, res) {
       readerId: req.user.userId,
       viewerRole
     })
+
     await emitConversationRefresh(conversation._id)
 
     res.status(200).json({ success: true })

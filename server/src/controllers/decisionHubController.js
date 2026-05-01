@@ -4,6 +4,7 @@ import Property from '../models/Property.js'
 import PropertyRequest from '../models/PropertyRequest.js'
 import ARSession from '../models/ARSession.js'
 import { calculateListingTrust } from '../services/decisionHub/trustScore.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 const DEFAULT_CHECKLIST = [
   'Room size matches listing',
@@ -288,6 +289,15 @@ export async function upsertDecisionNote(req, res) {
       )
     }
 
+    if ((existing && Boolean(existing.compareSelected) !== Boolean(payload.compareSelected)) || (!existing && payload.compareSelected)) {
+      await trackPropertyEvent({
+        propertyId,
+        userId: req.user.userId,
+        eventType: payload.compareSelected ? 'compare_add' : 'compare_remove',
+        metadata: { source: 'decision-note' }
+      }).catch(() => null)
+    }
+
     const note = await DecisionNote.findOneAndUpdate(
       { userId: req.user.userId, propertyId },
       {
@@ -334,6 +344,15 @@ export async function toggleCompareSelection(req, res) {
     }
 
     const baseNote = existing || makeDefaultNote(req.user.userId, propertyId)
+
+    if ((existing && Boolean(existing.compareSelected) !== compareSelected) || (!existing && compareSelected)) {
+      await trackPropertyEvent({
+        propertyId,
+        userId: req.user.userId,
+        eventType: compareSelected ? 'compare_add' : 'compare_remove',
+        metadata: { source: 'decision-hub' }
+      }).catch(() => null)
+    }
 
     const note = await DecisionNote.findOneAndUpdate(
       { userId: req.user.userId, propertyId },

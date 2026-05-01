@@ -4,6 +4,7 @@ import TenantPropertyRecord from '../models/TenantPropertyRecord.js'
 import ManagerDecision from '../models/ManagerDecision.js'
 import User from '../models/User.js'
 import { buildRequestActionLabel, createNotification } from '../services/notifications/notificationService.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -406,6 +407,16 @@ export async function createPropertyRequest(req, res) {
       actionUrl: getRequestDetailsActionUrl(request._id),
       priority: 'high'
     })
+
+    await trackPropertyEvent({
+      propertyId: property._id,
+      userId: req.user.userId,
+      eventType: 'request_submit',
+      metadata: {
+        requestId: request._id,
+        actionType
+      }
+    }).catch(() => null)
 
     res.status(201).json({
       success: true,

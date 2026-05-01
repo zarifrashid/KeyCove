@@ -159,6 +159,7 @@ export default function DashboardPage() {
               <div className="manager-dashboard-actions">
                 <Link to="/add-property" className="primary-btn">Add New Property</Link>
                 <Link to="/manager/leases" className="secondary-btn">Lease Details</Link>
+                <Link to="/manager/analytics" className="secondary-btn">Listing Analytics</Link>
                 <Link to="/explore" className="secondary-btn">Open Explore Map</Link>
                 <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
             <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>

@@ -5,6 +5,7 @@ import UserPreference from '../models/UserPreference.js'
 import { logInteraction } from '../services/recommendations/interactionService.js'
 import { inferUserPreferences, saveOnboardingPreferences } from '../services/recommendations/preferenceService.js'
 import { generateRecommendationsForUser } from '../services/recommendations/recommendationEngine.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 function ensureTenant(req, res) {
   if (req.user?.role !== 'tenant') {
@@ -119,6 +120,13 @@ export async function addFavorite(req, res) {
       recommendationId
     })
 
+    await trackPropertyEvent({
+      propertyId,
+      userId: req.user.userId,
+      eventType: 'favorite',
+      metadata: { recommendationId }
+    }).catch(() => null)
+
     if (recommendationId) {
       await Recommendation.findOneAndUpdate(
         { _id: recommendationId, user: req.user.userId },
@@ -142,6 +150,11 @@ export async function removeFavorite(req, res) {
     if (!ensureTenant(req, res)) return
 
     await Favorite.findOneAndDelete({ tenant: req.user.userId, property: req.params.propertyId })
+    await trackPropertyEvent({
+      propertyId: req.params.propertyId,
+      userId: req.user.userId,
+      eventType: 'unfavorite'
+    }).catch(() => null)
     res.status(200).json({ success: true, message: 'Favorite removed.' })
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to remove favorite.' })
