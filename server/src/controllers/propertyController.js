@@ -8,6 +8,7 @@ import { buildSortOption, normalizeSortOption } from '../utils/searchSort.js'
 import { deleteNeighbourhoodInsightForProperty, generateNeighbourhoodInsightForProperty } from '../services/neighbourhood/insightGenerator.js'
 import { logInteraction } from '../services/recommendations/interactionService.js'
 import { createBulkNotificationsForUsers, getAdminIds } from '../services/notifications/notificationService.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 const DHAKA_CENTER = {
   latitude: 23.8103,
@@ -450,6 +451,14 @@ export async function getPropertyById(req, res) {
         interactionType: 'property_view',
         source: 'property-details'
       })
+
+      await trackPropertyEvent({
+        propertyId: property._id,
+        userId: requesterId,
+        eventType: 'view',
+        sessionId: req.headers['x-keycove-session-id'] || '',
+        metadata: { source: 'property-details' }
+      }).catch(() => null)
     }
 
     res.status(200).json({ success: true, property })

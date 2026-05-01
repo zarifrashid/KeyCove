@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import ARSession from '../models/ARSession.js'
 import Property from '../models/Property.js'
+import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
 
 const MAX_FURNITURE_ITEMS = 70
 const MAX_INTERACTION_LOGS = 200
@@ -109,6 +110,13 @@ export async function getARSessionByProperty(req, res) {
 
   const session = isManagerOwner ? defaultSession : (personalSession || defaultSession)
   const source = isManagerOwner && defaultSession ? 'property_default' : personalSession ? 'user_custom' : defaultSession ? 'property_default' : 'empty'
+
+  await trackPropertyEvent({
+    propertyId,
+    userId,
+    eventType: 'design_room_open',
+    metadata: { source }
+  }).catch(() => null)
 
   return res.json({
     session: publicSession(session),
