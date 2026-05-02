@@ -245,6 +245,46 @@ export default function App() {
         }
       />
       <Route
+        path="/roommate-groups/:groupId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RoommateGroupDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportDetail />
+          </ProtectedRoute>
+        }
+      />
+<Route
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
