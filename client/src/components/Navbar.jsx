@@ -203,6 +203,18 @@ export default function Navbar({ unreadMessages = 0 }) {
                   <button type="button" className="secondary-btn" onClick={() => navigate('/dashboard')}>
                     View Profile
                   </button>
+                  {user?.role === 'tenant' ? (
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        navigate('/recently-viewed')
+                      }}
+                    >
+                      Recently Viewed
+                    </button>
+                  ) : null}
                   <button type="button" className="primary-btn" onClick={handleLogout}>
                     Logout
                   </button>

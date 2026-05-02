@@ -148,6 +148,20 @@ export default function PropertyDetailsPage() {
     fetchProperty()
   }, [id])
 
+  useEffect(() => {
+    const saveRecentlyViewed = async () => {
+      if (user?.role !== 'tenant' || !property?._id) return
+
+      try {
+        await api.post('/recently-viewed', { propertyId: property._id })
+      } catch (error) {
+        console.warn('Recently viewed save failed:', error.response?.data?.message || error.message)
+      }
+    }
+
+    saveRecentlyViewed()
+  }, [property?._id, user?.role])
+
 
   useEffect(() => {
     const fetchTrustBadge = async () => {
