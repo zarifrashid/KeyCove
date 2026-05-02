@@ -8,6 +8,7 @@ import RecommendationSection from '../components/recommendations/RecommendationS
 import SavedPropertiesSection from '../components/bookmarks/SavedPropertiesSection'
 import RequestSection from '../components/requests/RequestSection'
 import ManagerVerificationPanel from '../components/manager/ManagerVerificationPanel'
+import MyRoommateGroupsSection from '../components/roommates/MyRoommateGroupsSection'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -249,6 +250,9 @@ export default function DashboardPage() {
           error={requestState.error}
           emptyText="You have not submitted any property requests yet."
         />
+
+
+        <MyRoommateGroupsSection />
 
         <SavedPropertiesSection />
         <RecommendationSection compact />
