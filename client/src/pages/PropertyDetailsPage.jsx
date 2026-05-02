@@ -11,6 +11,7 @@ import BoardPickerModal from '../components/sharedBoards/BoardPickerModal'
 import ARPropertyViewer from '../components/ar/ARPropertyViewer'
 import DecisionNotePanel from '../components/decisionHub/DecisionNotePanel'
 import TrustBadge from '../components/decisionHub/TrustBadge'
+import ReportListingButton from '../components/reports/ReportListingButton'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -146,6 +147,20 @@ export default function PropertyDetailsPage() {
 
     fetchProperty()
   }, [id])
+
+  useEffect(() => {
+    const saveRecentlyViewed = async () => {
+      if (user?.role !== 'tenant' || !property?._id) return
+
+      try {
+        await api.post('/recently-viewed', { propertyId: property._id })
+      } catch (error) {
+        console.warn('Recently viewed save failed:', error.response?.data?.message || error.message)
+      }
+    }
+
+    saveRecentlyViewed()
+  }, [property?._id, user?.role])
 
 
   useEffect(() => {
@@ -388,6 +403,7 @@ export default function PropertyDetailsPage() {
                             <span className="bookmark-btn-icon" aria-hidden="true">{favoriteIds.has(property._id) ? '★' : '☆'}</span>
                             <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
                           </button>
+                          <ReportListingButton property={property} />
                         </>
                       ) : null}
                     </div>

@@ -5,6 +5,7 @@ import ManagerDecision from '../models/ManagerDecision.js'
 import User from '../models/User.js'
 import { buildRequestActionLabel, createNotification } from '../services/notifications/notificationService.js'
 import { trackPropertyEvent } from '../services/analytics/propertyAnalyticsService.js'
+import { handleSharedPropertyRequestDecision } from '../services/roommates/roommateGroupService.js'
 
 function normalizeString(value, fallback = '') {
   if (value === null || value === undefined) return fallback
@@ -59,6 +60,9 @@ function mapRequest(request) {
     _id: request._id,
     actionType: request.actionType,
     status: request.status,
+    applicationMode: request.applicationMode || 'solo',
+    roommateGroup: request.roommateGroup || null,
+    groupSnapshot: request.groupSnapshot || null,
     occupancyStatus: request.occupancyStatus || null,
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
@@ -80,6 +84,7 @@ async function populateRequestById(requestId) {
     .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
     .populate('tenant', 'name email role phone companyName applicationProfile createdAt updatedAt')
     .populate('manager', 'name email role phone companyName applicationProfile')
+    .populate('roommateGroup', 'targetGroupSize acceptedMemberCount remainingSlots rentPerPerson status preferences introMessage messageToManager')
     .lean()
 }
 
@@ -439,10 +444,16 @@ export async function getPropertyRequestById(req, res) {
     const tenantId = request.tenant?._id?.toString?.() || request.tenant?.toString?.()
     const managerId = request.manager?._id?.toString?.() || request.manager?.toString?.()
 
+
+    const groupMemberIds = (request.groupSnapshot?.acceptedMembers || [])
+      .map((member) => member?.user?.toString?.() || member?.user)
+      .filter(Boolean)
+
     const canView =
       req.user.role === 'admin' ||
       tenantId === req.user.userId ||
-      managerId === req.user.userId
+      managerId === req.user.userId ||
+      groupMemberIds.includes(req.user.userId)
 
     if (!canView) {
       return res.status(403).json({ message: 'You cannot view this property request.' })
@@ -459,7 +470,12 @@ export async function getPropertyRequestById(req, res) {
 
 export async function getMyTenantRequests(req, res) {
   try {
-    const requests = await PropertyRequest.find({ tenant: req.user.userId })
+    const requests = await PropertyRequest.find({
+      $or: [
+        { tenant: req.user.userId },
+        { 'groupSnapshot.acceptedMembers.user': req.user.userId }
+      ]
+    })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
       .populate('manager', 'name email role phone companyName applicationProfile')
       .sort({ createdAt: -1 })
@@ -483,6 +499,7 @@ export async function getManagerRequests(req, res) {
     const requests = await PropertyRequest.find({ manager: req.user.userId })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
       .populate('tenant', 'name email role phone companyName applicationProfile createdAt updatedAt')
+      .populate('roommateGroup', 'targetGroupSize acceptedMemberCount remainingSlots rentPerPerson status preferences introMessage messageToManager')
       .sort({ createdAt: -1 })
       .lean()
 
@@ -545,7 +562,11 @@ export async function updatePropertyRequestStatus(req, res) {
     await request.save()
 
     await safeUpsertManagerDecision(request)
-    await safeUpsertTenantPropertyRecord(request)
+    if (request.applicationMode === 'roommate_group') {
+      await handleSharedPropertyRequestDecision({ request, status, managerId: req.user.userId })
+    } else {
+      await safeUpsertTenantPropertyRecord(request)
+    }
 
     const populatedRequest = await populateRequestById(request._id)
     const actionLabel = buildRequestActionLabel(populatedRequest?.actionType || request.actionType)
@@ -580,8 +601,11 @@ export async function getApprovedTenantProperties(req, res) {
     }
 
     const requests = await PropertyRequest.find({
-      tenant: req.user.userId,
-      status: 'approved'
+      status: 'approved',
+      $or: [
+        { tenant: req.user.userId },
+        { 'groupSnapshot.acceptedMembers.user': req.user.userId }
+      ]
     })
       .populate('property', 'title image location listingType price salePrice rentPrice propertyType bedrooms bathrooms squareFeet')
       .populate('manager', 'name email role phone companyName applicationProfile')

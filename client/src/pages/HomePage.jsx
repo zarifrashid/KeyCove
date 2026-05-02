@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import PropertyMap from '../components/map/PropertyMap'
@@ -8,8 +8,6 @@ import AdvancedFilters from '../components/search/AdvancedFilters'
 import ActiveFilterChips from '../components/search/ActiveFilterChips'
 import { api, buildMapQuery } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
-import RecommendationSection from '../components/recommendations/RecommendationSection'
-import AffordabilityActiveBanner from '../components/affordability/AffordabilityActiveBanner'
 import useFavorites from '../hooks/useFavorites'
 
 const DHAKA_CENTER = [23.8103, 90.4125]
@@ -46,7 +44,7 @@ function classifyAffordability(propertyPrice, profile) {
 
 export default function HomePage() {
   const { user } = useAuth()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [stats, setStats] = useState({ totalActive: 0, areaBreakdown: [] })
@@ -274,18 +272,6 @@ export default function HomePage() {
     }, 500)
   }, [fetchProperties])
 
-  const areaSummary = useMemo(() => {
-    return stats.areaBreakdown?.map((entry) => `${entry._id}: ${entry.count}`).join(' • ') || 'No area stats yet'
-  }, [stats.areaBreakdown])
-
-  const activateAffordabilityFilter = () => {
-    setSearchParams({ budgetSafe: '1' })
-  }
-
-  const clearAffordabilityFilter = () => {
-    setSearchParams({})
-  }
-
   const handleToggleFavorite = async (propertyId) => {
     try {
       setBookmarkBusyId(propertyId)
@@ -295,21 +281,28 @@ export default function HomePage() {
     }
   }
 
+  useEffect(() => {
+    const syncNavHeight = () => {
+      const nav = document.querySelector('.tenant-nav, .nav')
+      if (nav) {
+        document.documentElement.style.setProperty('--kc-nav-height', `${nav.offsetHeight}px`)
+      }
+    }
+
+    document.body.classList.add('explore-map-active')
+    syncNavHeight()
+    window.addEventListener('resize', syncNavHeight)
+
+    return () => {
+      document.body.classList.remove('explore-map-active')
+      document.documentElement.style.removeProperty('--kc-nav-height')
+      window.removeEventListener('resize', syncNavHeight)
+    }
+  }, [])
+
   return (
     <>
       <Navbar />
-      <div className="page-wrap explore-page-stack">
-        {/*user?.role === 'tenant' ? <RecommendationSection compact /> : null} */}
-        {user?.role === 'tenant' && !affordabilityFilterActive ? <RecommendationSection compact /> : null}
-        {user?.role === 'tenant' ? (
-          <AffordabilityActiveBanner
-            profile={affordabilityProfile}
-            active={affordabilityFilterActive}
-            onEnable={activateAffordabilityFilter}
-            onDisable={clearAffordabilityFilter}
-          />
-        ) : null}
-      </div>
       <div className="explore-map-page dual-panel-layout">
         <div className="explore-map-background">
           <PropertyMap

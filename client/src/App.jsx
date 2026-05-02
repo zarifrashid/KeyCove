@@ -20,9 +20,15 @@ import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import DecisionHubPage from './pages/DecisionHubPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import NotificationsPage from './pages/NotificationsPage'
+import AdminPropertyReportsPage from './pages/AdminPropertyReportsPage'
+import AdminPropertyReportDetail from './pages/AdminPropertyReportDetail'
+import TenantReportsPage from './pages/TenantReportsPage'
+import TenantReportDetail from './pages/TenantReportDetail'
+import RecentlyViewedPage from './pages/RecentlyViewedPage'
 import ManagerAnalyticsPage from './pages/ManagerAnalyticsPage'
 import ManagerPropertyAnalyticsPage from './pages/ManagerPropertyAnalyticsPage'
 import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
+import RoommateGroupDetailsPage from './pages/RoommateGroupDetailsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -190,8 +196,54 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
-
+      <Route
+        path="/roommate-groups/:groupId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RoommateGroupDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recently-viewed"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RecentlyViewedPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin"
         element={
@@ -200,7 +252,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/decision-hub"
         element={
