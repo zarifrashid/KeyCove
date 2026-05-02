@@ -23,6 +23,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import ManagerAnalyticsPage from './pages/ManagerAnalyticsPage'
 import ManagerPropertyAnalyticsPage from './pages/ManagerPropertyAnalyticsPage'
 import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
+import RoommateGroupDetailsPage from './pages/RoommateGroupDetailsPage'
 import { useAuth } from './context/AuthContext'
 
 function AuthOnlyRoute({ children }) {
@@ -192,7 +193,16 @@ export default function App() {
       />
 
 
+      
       <Route
+        path="/roommate-groups/:groupId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <RoommateGroupDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+<Route
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">

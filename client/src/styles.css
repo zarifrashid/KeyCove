@@ -7290,3 +7290,275 @@ body.explore-map-active .results-side-card {
     overflow: auto;
   }
 }
+
+/* Roommate Match + Shared Lease Application */
+.roommate-selector-card,
+.roommate-flow-card,
+.roommate-detail-card {
+  display: grid;
+  gap: 22px;
+}
+
+.roommate-selector-card h2,
+.roommate-flow-card h2,
+.roommate-detail-card h1 {
+  margin: 6px 0;
+}
+
+.roommate-muted {
+  color: #607086;
+  line-height: 1.55;
+}
+
+.roommate-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.roommate-choice-card {
+  border: 1px solid #dce6ff;
+  background: #f8fbff;
+  border-radius: 20px;
+  padding: 22px;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  color: #18212f;
+  cursor: pointer;
+  box-shadow: 0 16px 32px rgba(93, 88, 255, 0.08);
+}
+
+.roommate-choice-card strong {
+  font-size: 1.15rem;
+}
+
+.roommate-choice-card span {
+  color: #607086;
+}
+
+.roommate-choice-card--primary {
+  background: linear-gradient(135deg, #6d5dfc, #8c7bff);
+  color: #fff;
+  border-color: transparent;
+}
+
+.roommate-choice-card--primary span {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.roommate-back-btn {
+  justify-self: start;
+}
+
+.roommate-section-header,
+.roommate-group-card-top,
+.roommate-member-editor-top,
+.shared-request-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.roommate-header-actions,
+.roommate-search-row,
+.roommate-member-chips,
+.request-action-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.roommate-form-grid,
+.roommate-detail-grid,
+.roommate-group-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.roommate-rent-pill {
+  background: #f6f7ff;
+  border: 1px solid #e3e6ff;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.roommate-rent-pill span,
+.roommate-group-stats span {
+  color: #607086;
+  font-size: 0.9rem;
+}
+
+.roommate-rent-pill strong,
+.roommate-group-stats strong {
+  color: #312b8d;
+  font-size: 1.1rem;
+}
+
+.roommate-rent-pill--wide {
+  max-width: 360px;
+}
+
+.roommate-member-editor,
+.roommate-group-card,
+.roommate-mini-card,
+.roommate-review-card,
+.roommate-member-card,
+.shared-member-card {
+  border: 1px solid #e1e8f6;
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.roommate-member-editor,
+.roommate-group-card,
+.roommate-review-card {
+  box-shadow: 0 14px 34px rgba(15, 76, 129, 0.06);
+}
+
+.roommate-search-row {
+  position: relative;
+}
+
+.roommate-search-row input {
+  flex: 1;
+  min-width: 260px;
+  padding: 12px 14px;
+  border: 1px solid #d8e3f0;
+  border-radius: 12px;
+}
+
+.roommate-search-results {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.roommate-search-results button {
+  text-align: left;
+  border: 1px solid #e1e8f6;
+  background: #f8fbff;
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.roommate-group-list,
+.roommate-member-list,
+.shared-member-list {
+  display: grid;
+  gap: 16px;
+}
+
+.roommate-group-preferences,
+.roommate-member-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.roommate-group-preferences span,
+.roommate-member-chips span,
+.roommate-state-label {
+  background: #eef4ff;
+  color: #33405c;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.roommate-group-preferences--large {
+  margin: 8px 0;
+}
+
+.roommate-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(17, 24, 39, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.roommate-modal {
+  width: min(860px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 24px;
+  padding: 26px;
+  display: grid;
+  gap: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+.roommate-dashboard-grid,
+.roommate-detail-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.roommate-dashboard-column {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.roommate-intro-box {
+  background: #f8fbff;
+  border-left: 4px solid #6d5dfc;
+  padding: 16px;
+  border-radius: 14px;
+  color: #33405c;
+}
+
+.shared-request-panel {
+  border-color: #d9d4ff;
+  background: #fbfaff;
+}
+
+.shared-member-list {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.shared-member-card h5,
+.roommate-member-card h4,
+.roommate-mini-card h4,
+.roommate-review-card h4 {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .roommate-choice-grid,
+  .roommate-section-header,
+  .roommate-group-card-top,
+  .roommate-member-editor-top {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .roommate-header-actions,
+  .request-action-row {
+    align-items: stretch;
+  }
+
+  .roommate-header-actions .primary-btn,
+  .roommate-header-actions .secondary-btn,
+  .request-action-row .primary-btn,
+  .request-action-row .secondary-btn {
+    text-align: center;
+  }
+}

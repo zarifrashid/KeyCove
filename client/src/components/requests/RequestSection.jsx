@@ -76,6 +76,42 @@ function TenantProfilePanel({ tenant, snapshot }) {
   )
 }
 
+function SharedApplicationPanel({ request }) {
+  const group = request?.groupSnapshot || {}
+  const members = group.acceptedMembers || []
+  const preferences = group.preferences || {}
+
+  return (
+    <div className="request-profile-panel shared-request-panel">
+      <div className="shared-request-heading">
+        <span className="badge">SHARED ROOMMATE APPLICATION</span>
+        <p>This is a shared roommate application. Review all applicants before approving.</p>
+      </div>
+      <div className="request-profile-grid">
+        <p><strong>Group Size:</strong> {members.length}/{group.targetGroupSize || members.length}</p>
+        <p><strong>Rent Per Person:</strong> {formatMoney(group.rentPerPerson)}</p>
+        <p><strong>Creator:</strong> {request.tenantSnapshot?.name || request.tenant?.name || 'Not available'}</p>
+        <p><strong>Manager Message:</strong> {group.messageToManager || request.note || 'Not provided'}</p>
+      </div>
+      <div className="shared-member-list">
+        {members.map((member, index) => (
+          <article key={member.user || member.email || index} className="shared-member-card">
+            <h5>{member.name || 'Roommate'}</h5>
+            <p><strong>Email:</strong> {member.email || 'Manual / not registered'}</p>
+            <p><strong>Phone:</strong> {member.phone || 'Not provided'}</p>
+            <p><strong>Occupation:</strong> {member.occupation || 'Not provided'}</p>
+            <p><strong>Status:</strong> {member.employmentStatus || 'Not provided'}</p>
+            <p><strong>Contribution:</strong> {member.expectedContribution ? formatMoney(member.expectedContribution) : 'Not provided'}</p>
+          </article>
+        ))}
+      </div>
+      <div className="roommate-group-preferences">
+        {Object.entries(preferences).map(([key, value]) => value ? <span key={key}>{key.replace(/([A-Z])/g, ' $1')}: {value}</span> : null)}
+      </div>
+    </div>
+  )
+}
+
 export default function RequestSection({
   title,
   subtitle,
@@ -109,13 +145,14 @@ export default function RequestSection({
         <div className="request-list">
           {requests.map((request) => {
             const normalizedSnapshot = request?.tenantSnapshot || request?.applicationDetails || {}
+            const isSharedApplication = request?.applicationMode === 'roommate_group'
             const isLeaseEligible = isManager && request.status === 'approved' && ['rent', 'lease'].includes(request.actionType)
 
             return (
               <article key={request._id} className="request-card">
                 <div className="request-card-topline">
                   <div>
-                    <p className="badge">{(request.actionType || 'request').toUpperCase()}</p>
+                    <p className="badge">{isSharedApplication ? 'SHARED ROOMMATE APPLICATION' : (request.actionType || 'request').toUpperCase()}</p>
                     <h4>{request.property?.title || 'Property'}</h4>
                   </div>
 
@@ -126,7 +163,7 @@ export default function RequestSection({
 
                 <div className="request-card-grid">
                   <div>
-                    <p><strong>Tenant:</strong> {normalizedSnapshot.name || request.tenant?.name || 'Not available'}</p>
+                    <p><strong>{isSharedApplication ? 'Primary Applicant' : 'Tenant'}:</strong> {normalizedSnapshot.name || request.tenant?.name || 'Not available'}</p>
                     <p><strong>Email:</strong> {normalizedSnapshot.email || request.tenant?.email || 'Not available'}</p>
                     <RequestMeta request={request} />
                   </div>
@@ -142,7 +179,11 @@ export default function RequestSection({
                   </div>
                 </div>
 
-                {isManager ? (
+                {isManager && isSharedApplication ? (
+                  <SharedApplicationPanel request={request} />
+                ) : null}
+
+                {isManager && !isSharedApplication ? (
                   <TenantProfilePanel tenant={request.tenant} snapshot={normalizedSnapshot} />
                 ) : null}
 
