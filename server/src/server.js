@@ -20,6 +20,8 @@ import adminRoutes from './routes/adminRoutes.js'
 import managerVerificationRoutes from './routes/managerVerificationRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
 import analyticsRoutes from './routes/analyticsRoutes.js'
+import roommateGroupRoutes from './routes/roommateGroupRoutes.js'
+import propertyReportRoutes from './routes/propertyReportRoutes.js'
 import { startLeaseNotificationScheduler } from './services/notifications/leaseNotificationScheduler.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -69,6 +71,8 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/manager-verifications', managerVerificationRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/roommate-groups', roommateGroupRoutes)
+app.use('/api/property-reports', propertyReportRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
 connectDB().then(() => {

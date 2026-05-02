@@ -3,6 +3,10 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import Navbar from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
+import ApplicationModeSelector from '../components/roommates/ApplicationModeSelector'
+import RoommateModeSelector from '../components/roommates/RoommateModeSelector'
+import KnownRoommateForm from '../components/roommates/KnownRoommateForm'
+import RoommateSearchPanel from '../components/roommates/RoommateSearchPanel'
 
 function formatMoney(value, suffix = '') {
   const amount = `৳ ${Number(value || 0).toLocaleString()}`
@@ -46,6 +50,8 @@ export default function PropertyActionPage() {
   const [searchParams] = useSearchParams()
   const actionType = searchParams.get('type')
   const [property, setProperty] = useState(null)
+  const [applicationMode, setApplicationMode] = useState('')
+  const [roommateMode, setRoommateMode] = useState('')
   const [leaseMonths, setLeaseMonths] = useState('12')
   const [note, setNote] = useState('')
   const [applicationDetails, setApplicationDetails] = useState({
@@ -110,7 +116,11 @@ export default function PropertyActionPage() {
       }
     }
 
-    if (id && actionType) fetchPropertyAndPrefill()
+    if (id && actionType) {
+      setApplicationMode(actionType === 'buy' ? 'alone' : '')
+      setRoommateMode('')
+      fetchPropertyAndPrefill()
+    }
   }, [actionType, id, user?.applicationProfile, user?.email, user?.name, user?.phone])
 
   const monthlyRent = useMemo(() => getRentPrice(property), [property])
@@ -208,7 +218,38 @@ export default function PropertyActionPage() {
           {state.success ? <p className="success-text">{state.success}</p> : null}
 
           {property && !state.loading ? (
-            <form className="property-action-form" onSubmit={handleSubmit}>
+            <>
+              {actionType !== 'buy' && !applicationMode ? (
+                <ApplicationModeSelector actionType={actionType} onSelect={setApplicationMode} />
+              ) : null}
+
+              {actionType !== 'buy' && applicationMode === 'roommates' && !roommateMode ? (
+                <RoommateModeSelector
+                  onSelect={setRoommateMode}
+                  onBack={() => setApplicationMode('')}
+                />
+              ) : null}
+
+              {actionType !== 'buy' && applicationMode === 'roommates' && roommateMode === 'known' ? (
+                <KnownRoommateForm
+                  property={property}
+                  actionType={actionType}
+                  leaseMonths={leaseMonths}
+                  onBack={() => setRoommateMode('')}
+                />
+              ) : null}
+
+              {actionType !== 'buy' && applicationMode === 'roommates' && roommateMode === 'unknown' ? (
+                <RoommateSearchPanel
+                  property={property}
+                  actionType={actionType}
+                  leaseMonths={leaseMonths}
+                  onBack={() => setRoommateMode('')}
+                />
+              ) : null}
+
+              {(actionType === 'buy' || applicationMode === 'alone') ? (
+                <form className="property-action-form" onSubmit={handleSubmit}>
               <div className="property-action-topline">
                 <p className="badge">Tenant Action</p>
                 <h1>{copy.title}</h1>
@@ -397,7 +438,9 @@ export default function PropertyActionPage() {
                   </div>
                 </>
               )}
-            </form>
+                </form>
+              ) : null}
+            </>
           ) : null}
         </section>
       </div>

@@ -24,7 +24,7 @@ const tenantPropertyRecordSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'PropertyRequest',
       required: true,
-      unique: true
+      index: true
     },
     actionType: {
       type: String,
@@ -60,5 +60,6 @@ const tenantPropertyRecordSchema = new mongoose.Schema(
 tenantPropertyRecordSchema.index({ tenant: 1, occupancyStatus: 1, approvedAt: -1 })
 tenantPropertyRecordSchema.index({ manager: 1, approvedAt: -1 })
 tenantPropertyRecordSchema.index({ tenant: 1, property: 1, actionType: 1 })
+tenantPropertyRecordSchema.index({ sourceRequest: 1, tenant: 1 }, { unique: true })
 
 export default mongoose.model('TenantPropertyRecord', tenantPropertyRecordSchema)
