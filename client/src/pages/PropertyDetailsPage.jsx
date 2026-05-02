@@ -11,6 +11,7 @@ import BoardPickerModal from '../components/sharedBoards/BoardPickerModal'
 import ARPropertyViewer from '../components/ar/ARPropertyViewer'
 import DecisionNotePanel from '../components/decisionHub/DecisionNotePanel'
 import TrustBadge from '../components/decisionHub/TrustBadge'
+import ReportListingButton from '../components/reports/ReportListingButton'
 
 const AMENITY_ICON_MAP = {
   Lift: '⇅',
@@ -388,6 +389,7 @@ export default function PropertyDetailsPage() {
                             <span className="bookmark-btn-icon" aria-hidden="true">{favoriteIds.has(property._id) ? '★' : '☆'}</span>
                             <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
                           </button>
+                          <ReportListingButton property={property} />
                         </>
                       ) : null}
                     </div>

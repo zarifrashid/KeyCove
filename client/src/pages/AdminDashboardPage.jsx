@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { api } from '../lib/api'
 
@@ -259,6 +260,9 @@ export default function AdminDashboardPage() {
           <p className="badge">Global Admin Command Center</p>
           <h1>KeyCove Platform Control</h1>
           <p>Manage platform overview, users, roles, admin accounts, and manager verification without changing tenant or manager workflows.</p>
+          <div className="hero-actions" style={{ marginTop: '18px' }}>
+            <Link to="/admin/reports" className="secondary-btn">Property Reports</Link>
+          </div>
         </section>
 
         {state.loading ? <p className="center-box">Loading admin dashboard...</p> : null}

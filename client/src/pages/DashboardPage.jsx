@@ -136,6 +136,7 @@ export default function DashboardPage() {
             </div>
             <div className="hero-actions" style={{ marginTop: '24px' }}>
               <Link to="/admin" className="primary-btn">Open Admin Center</Link>
+              <Link to="/admin/reports" className="secondary-btn">Property Reports</Link>
               <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
             </div>
           </div>
@@ -238,6 +239,7 @@ export default function DashboardPage() {
             <Link to="/recommendations" className="secondary-btn">View Recommendations</Link>
             <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
             <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
+            <Link to="/tenant/reports" className="secondary-btn">My Reports</Link>
             <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
           </div>
         </div>

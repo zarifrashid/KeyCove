@@ -20,6 +20,10 @@ import SharedBoardDetailsPage from './pages/SharedBoardDetailsPage'
 import DecisionHubPage from './pages/DecisionHubPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import NotificationsPage from './pages/NotificationsPage'
+import AdminPropertyReportsPage from './pages/AdminPropertyReportsPage'
+import AdminPropertyReportDetail from './pages/AdminPropertyReportDetail'
+import TenantReportsPage from './pages/TenantReportsPage'
+import TenantReportDetail from './pages/TenantReportDetail'
 import ManagerAnalyticsPage from './pages/ManagerAnalyticsPage'
 import ManagerPropertyAnalyticsPage from './pages/ManagerPropertyAnalyticsPage'
 import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
@@ -199,6 +203,38 @@ export default function App() {
         element={
           <ProtectedRoute allowedRole="tenant">
             <RoommateGroupDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminPropertyReportDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tenant/reports/:reportId"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantReportDetail />
           </ProtectedRoute>
         }
       />
