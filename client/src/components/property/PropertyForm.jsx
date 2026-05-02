@@ -46,7 +46,9 @@ export default function PropertyForm({
   onAddImageUrl,
   onARAssetChange,
   onFurnitureCatalogChange,
-  onRoomTemplatesChange
+  onRoomTemplatesChange,
+  onChooseLocation,
+  selectedLocationLabel = ''
 }) {
   const amenitiesText = useMemo(() => form.amenities.join(', '), [form.amenities])
   const galleryImages = Array.isArray(form.galleryImages) ? form.galleryImages : []
@@ -64,6 +66,16 @@ export default function PropertyForm({
     [form.arAssets?.roomTemplates]
   )
   const [manualGalleryUrl, setManualGalleryUrl] = useState('')
+  const hasSelectedMapLocation = form.location.latitude !== ''
+    && form.location.latitude !== null
+    && form.location.latitude !== undefined
+    && form.location.longitude !== ''
+    && form.location.longitude !== null
+    && form.location.longitude !== undefined
+    && Number.isFinite(Number(form.location.latitude))
+    && Number.isFinite(Number(form.location.longitude))
+  const locationDisplayText = selectedLocationLabel
+    || [form.location.address, form.location.area, form.location.city].map((part) => String(part || '').trim()).filter(Boolean).join(', ')
 
   return (
     <form
@@ -154,24 +166,17 @@ export default function PropertyForm({
       </div>
 
       <div className="property-grid three-col">
-        <Field label="Latitude">
-          <input
-            type="number"
-            step="any"
-            value={form.location.latitude}
-            onChange={(event) => onNestedChange('location', 'latitude', event.target.value)}
-            placeholder="23.8103"
-          />
-        </Field>
-        <Field label="Longitude">
-          <input
-            type="number"
-            step="any"
-            value={form.location.longitude}
-            onChange={(event) => onNestedChange('location', 'longitude', event.target.value)}
-            placeholder="90.4125"
-          />
-        </Field>
+        <div className="property-field property-map-picker-field">
+          <span>Property Location</span>
+          <button type="button" className="secondary-btn property-map-picker-btn" onClick={onChooseLocation}>
+            {hasSelectedMapLocation ? 'Change Location' : 'Choose on Map'}
+          </button>
+          <small className={hasSelectedMapLocation ? 'property-map-picker-status success' : 'property-map-picker-status'}>
+            {hasSelectedMapLocation
+              ? (locationDisplayText ? `Selected location: ${locationDisplayText}` : 'Location selected successfully')
+              : 'No map location selected yet'}
+          </small>
+        </div>
         <Field label="Sale / Rent">
           <select value={form.listingType} onChange={(event) => onChange('listingType', event.target.value)}>
             {LISTING_OPTIONS.map((option) => (

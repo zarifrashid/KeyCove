@@ -85,6 +85,31 @@ function buildGallery(property) {
     .sort((first, second) => (first.sortOrder ?? 0) - (second.sortOrder ?? 0))
 }
 
+
+function buildPropertyMapUrl(property) {
+  const location = property?.location || {}
+  const hasLatitude = location.latitude !== '' && location.latitude !== null && location.latitude !== undefined
+  const hasLongitude = location.longitude !== '' && location.longitude !== null && location.longitude !== undefined
+  const latitude = Number(location.latitude)
+  const longitude = Number(location.longitude)
+
+  if (hasLatitude && hasLongitude && Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+  }
+
+  const addressParts = [location.address, location.area, location.city]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+
+  if (addressParts.length) {
+    const hasBangladesh = addressParts.some((part) => /bangladesh/i.test(part))
+    const fullAddress = [...addressParts, ...(hasBangladesh ? [] : ['Bangladesh'])].join(', ')
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+  }
+
+  return 'https://www.google.com/maps/search/?api=1&query=Dhaka,%20Bangladesh'
+}
+
 function FactCard({ label, value }) {
   return (
     <article className="property-fact-card">
@@ -361,7 +386,7 @@ export default function PropertyDetailsPage() {
                       <Link to="/explore" className="secondary-btn">Back to Map</Link>
                       <a
                         className="primary-btn"
-                        href={`https://www.openstreetmap.org/?mlat=${property.location?.latitude || 23.8103}&mlon=${property.location?.longitude || 90.4125}#map=16/${property.location?.latitude || 23.8103}/${property.location?.longitude || 90.4125}`}
+                        href={buildPropertyMapUrl(property)}
                         target="_blank"
                         rel="noreferrer"
                       >

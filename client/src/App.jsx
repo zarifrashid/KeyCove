@@ -25,9 +25,11 @@ import AdminPropertyReportDetail from './pages/AdminPropertyReportDetail'
 import TenantReportsPage from './pages/TenantReportsPage'
 import TenantReportDetail from './pages/TenantReportDetail'
 import RecentlyViewedPage from './pages/RecentlyViewedPage'
+import TenantFAQPage from './pages/TenantFAQPage'
 import ManagerAnalyticsPage from './pages/ManagerAnalyticsPage'
 import ManagerPropertyAnalyticsPage from './pages/ManagerPropertyAnalyticsPage'
 import PropertyRequestDetailsPage from './pages/PropertyRequestDetailsPage'
+import PropertyLocationPickerPage from './pages/PropertyLocationPickerPage'
 import RoommateGroupDetailsPage from './pages/RoommateGroupDetailsPage'
 import { useAuth } from './context/AuthContext'
 
@@ -65,6 +67,14 @@ export default function App() {
         element={
           <ProtectedRoute allowedRole="manager">
             <AddPropertyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/property-location-picker"
+        element={
+          <ProtectedRoute allowedRole="manager">
+            <PropertyLocationPickerPage />
           </ProtectedRoute>
         }
       />
@@ -137,6 +147,14 @@ export default function App() {
         element={
           <ProtectedRoute allowedRole="tenant">
             <MortgageCalculatorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/faq"
+        element={
+          <ProtectedRoute allowedRole="tenant">
+            <TenantFAQPage />
           </ProtectedRoute>
         }
       />

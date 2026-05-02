@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import PropertyForm from '../components/property/PropertyForm'
@@ -115,6 +115,21 @@ function syncImageFields(previousForm, galleryImages) {
   }
 }
 
+function hasValidMapCoordinates(location = {}) {
+  const hasLatitude = location.latitude !== '' && location.latitude !== null && location.latitude !== undefined
+  const hasLongitude = location.longitude !== '' && location.longitude !== null && location.longitude !== undefined
+  const latitude = Number(location.latitude)
+  const longitude = Number(location.longitude)
+  return hasLatitude && hasLongitude && Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180
+}
+
+function getLocationSearchText(location = {}) {
+  return [location.address, location.area, location.city]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join(', ')
+}
+
 function mapPropertyToForm(property) {
   const galleryImages = buildGalleryFromProperty(property)
   return {
@@ -179,6 +194,39 @@ export default function AddPropertyPage() {
   const isEdit = useMemo(() => Boolean(id), [id])
   const [form, setForm] = useState(INITIAL_FORM)
   const [pageState, setPageState] = useState({ loading: isEdit, submitting: false, error: '' })
+  const [selectedLocationLabel, setSelectedLocationLabel] = useState('')
+  const locationPickerKey = useRef(`keycove-property-location-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
+
+  useEffect(() => {
+    const handleLocationSelection = (event) => {
+      if (event.key !== locationPickerKey.current || !event.newValue) return
+
+      try {
+        const selectedLocation = JSON.parse(event.newValue)
+        const latitude = Number(selectedLocation.latitude)
+        const longitude = Number(selectedLocation.longitude)
+
+        if (!hasValidMapCoordinates({ latitude, longitude })) return
+
+        setForm((previous) => ({
+          ...previous,
+          location: {
+            ...previous.location,
+            latitude: String(latitude),
+            longitude: String(longitude)
+          }
+        }))
+        setSelectedLocationLabel(selectedLocation.label || '')
+        setPageState((previous) => ({ ...previous, error: '' }))
+        localStorage.removeItem(locationPickerKey.current)
+      } catch (_) {
+        // Ignore invalid location picker payloads so the form stays unchanged.
+      }
+    }
+
+    window.addEventListener('storage', handleLocationSelection)
+    return () => window.removeEventListener('storage', handleLocationSelection)
+  }, [])
 
   useEffect(() => {
     if (!isEdit) return
@@ -209,6 +257,22 @@ export default function AddPropertyPage() {
         [field]: value
       }
     }))
+  }
+
+  const handleChooseLocation = () => {
+    const params = new URLSearchParams({ returnKey: locationPickerKey.current })
+    const searchText = getLocationSearchText(form.location)
+
+    if (hasValidMapCoordinates(form.location)) {
+      params.set('lat', String(form.location.latitude))
+      params.set('lng', String(form.location.longitude))
+    }
+
+    if (searchText) {
+      params.set('query', searchText)
+    }
+
+    window.open(`/property-location-picker?${params.toString()}`, '_blank', 'noopener,noreferrer')
   }
 
   const handleARAssetChange = (field, value) => {
@@ -448,6 +512,15 @@ export default function AddPropertyPage() {
   }
 
   const handleSubmit = async (action) => {
+    if (action === 'publish' && !hasValidMapCoordinates(form.location)) {
+      setPageState((previous) => ({
+        ...previous,
+        submitting: false,
+        error: 'Please choose the property location on the map before publishing.'
+      }))
+      return
+    }
+
     try {
       setPageState((previous) => ({ ...previous, submitting: true, error: '' }))
 
@@ -522,6 +595,8 @@ export default function AddPropertyPage() {
               onARAssetChange={handleARAssetChange}
               onFurnitureCatalogChange={handleFurnitureCatalogChange}
               onRoomTemplatesChange={handleRoomTemplatesChange}
+              onChooseLocation={handleChooseLocation}
+              selectedLocationLabel={selectedLocationLabel}
             />
           )}
         </div>
