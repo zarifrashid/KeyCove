@@ -8603,3 +8603,615 @@ body {
     height: 480px;
   }
 }
+
+/* KeyCove updated 4-5: safer visual-only polish for Explore Map and Property Details */
+body.explore-map-active .explore-panel-left.collapsed {
+  bottom: auto;
+}
+
+body.explore-map-active .explore-panel-left.collapsed .panel-inner-toggle {
+  margin: 0;
+}
+
+body.explore-map-active .explore-panel-left.collapsed .edge-toggle-btn {
+  flex-direction: row;
+  min-width: 118px;
+  min-height: 48px;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(111, 108, 255, 0.16);
+  color: var(--kc-brand-deep);
+}
+
+body.explore-map-active .explore-panel-left.collapsed .edge-toggle-btn span {
+  font-size: 1.05rem;
+}
+
+body.explore-map-active .explore-panel-left.collapsed .edge-toggle-btn small {
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+}
+
+body.explore-map-active .results-side-card {
+  width: min(386px, calc(100vw - 96px));
+  padding: 16px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.results-panel-header h2 {
+  letter-spacing: -0.02em;
+}
+
+.results-panel-header p {
+  font-size: 0.82rem;
+}
+
+.results-meta-strip span {
+  background: #f1f0ff;
+  color: #5955f6;
+}
+
+.property-list.compact {
+  gap: 16px;
+}
+
+.property-card.compact.map-result-card {
+  grid-template-columns: 1fr;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(111, 108, 255, 0.12);
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(31, 35, 51, 0.10);
+}
+
+.property-card.compact.map-result-card:hover,
+.property-card.compact.map-result-card.active {
+  border-color: rgba(111, 108, 255, 0.34);
+  box-shadow: 0 22px 48px rgba(69, 65, 190, 0.18);
+  transform: translateY(-2px);
+}
+
+.map-result-image-wrap {
+  position: relative;
+  min-height: 186px;
+  overflow: hidden;
+  background: #edf1fb;
+}
+
+.property-card.compact.map-result-card .property-card-image {
+  display: block;
+  width: 100%;
+  height: 206px;
+  min-height: 206px;
+  border-radius: 0;
+  object-fit: cover;
+  transition: transform 0.22s ease;
+}
+
+.property-card.compact.map-result-card:hover .property-card-image {
+  transform: scale(1.035);
+}
+
+.map-result-image-gradient {
+  position: absolute;
+  inset: auto 0 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(12, 16, 32, 0.54));
+  pointer-events: none;
+}
+
+.map-result-floating-tags {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.map-result-floating-tags .property-type-chip,
+.map-result-floating-tags .affordability-inline-pill {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
+}
+
+.property-card.compact .map-result-card-body {
+  gap: 10px;
+  padding: 14px;
+}
+
+.map-result-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.map-result-title-row h3 {
+  color: #151a2d;
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.map-result-title-row strong {
+  color: #1f2333;
+  white-space: nowrap;
+  font-size: 1rem;
+}
+
+.map-result-trust-line {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+.map-result-trust-line .trust-breakdown-card {
+  right: auto;
+  left: 0;
+}
+
+.map-result-amenities {
+  margin-top: -2px;
+}
+
+.map-result-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.property-card.compact .map-result-actions .secondary-btn,
+.property-card.compact .map-result-actions .primary-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+}
+
+.property-details-layout {
+  width: min(1280px, 100%);
+}
+
+.property-action-groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.property-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e8ebfb;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fbfcff, #f7f6ff);
+}
+
+.property-action-group-label {
+  flex-basis: 100%;
+  color: #667085;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.property-action-group .primary-btn,
+.property-action-group .secondary-btn,
+.property-action-group .report-listing-btn {
+  min-height: 42px;
+  border-radius: 14px;
+  padding: 10px 16px;
+}
+
+.property-action-group .primary-btn {
+  background: var(--kc-brand);
+  color: #ffffff;
+}
+
+.property-action-group .secondary-btn {
+  background: #f5f6fb;
+  border: 1px solid #e1e5f3;
+  color: #374151;
+}
+
+.property-action-group .bookmark-btn.is-saved {
+  background: #f1f0ff;
+  color: var(--kc-brand-deep);
+  border-color: rgba(111, 108, 255, 0.22);
+}
+
+.property-details-essential-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.property-details-essential-grid .property-fact-card {
+  border-color: rgba(111, 108, 255, 0.10);
+  border-radius: 22px;
+  box-shadow: 0 14px 32px rgba(31, 35, 51, 0.06);
+}
+
+.property-about-card,
+.property-insights-anchor .neighbourhood-card,
+.property-button-opened-panel {
+  border-radius: 28px;
+  border: 1px solid rgba(111, 108, 255, 0.10);
+  box-shadow: 0 18px 44px rgba(31, 35, 51, 0.07);
+}
+
+.property-insights-anchor .neighbourhood-card {
+  background: #ffffff;
+}
+
+.property-body-copy {
+  color: #4b5563;
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  body.explore-map-active .results-side-card {
+    width: min(350px, calc(100vw - 72px));
+  }
+
+  .property-card.compact.map-result-card .property-card-image {
+    height: 180px;
+    min-height: 180px;
+  }
+
+  .property-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .property-main-image {
+    height: 360px;
+  }
+}
+
+@media (max-width: 620px) {
+  .map-result-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .property-action-group .primary-btn,
+  .property-action-group .secondary-btn,
+  .property-action-group .report-listing-btn,
+  .property-action-menu-wrap {
+    width: 100%;
+  }
+}
+
+.property-action-group .danger-outline-btn {
+  min-height: 42px;
+  border-radius: 14px;
+  padding: 10px 16px;
+}
+
+/* KeyCove updated 4-5 polish pass: transparent button system + feature spotlight cards */
+.button-link:not(.danger-btn):not(.danger-outline-btn),
+.primary-btn:not(.danger-btn):not(.danger-outline-btn),
+.secondary-btn:not(.danger-btn):not(.danger-outline-btn),
+.popup-button:not(.danger-btn):not(.danger-outline-btn),
+.ghost-action-btn:not(.danger-btn):not(.danger-outline-btn) {
+  background: rgba(255, 255, 255, 0.68);
+  color: #303746;
+  border: 1px solid rgba(111, 108, 255, 0.24);
+  box-shadow: 0 10px 24px rgba(31, 35, 51, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.button-link:not(.danger-btn):not(.danger-outline-btn):hover,
+.primary-btn:not(.danger-btn):not(.danger-outline-btn):hover,
+.secondary-btn:not(.danger-btn):not(.danger-outline-btn):hover,
+.popup-button:not(.danger-btn):not(.danger-outline-btn):hover,
+.ghost-action-btn:not(.danger-btn):not(.danger-outline-btn):hover {
+  background: rgba(111, 108, 255, 0.08);
+  color: var(--kc-brand-deep, #5955f6);
+  border-color: rgba(111, 108, 255, 0.42);
+  box-shadow: 0 14px 30px rgba(111, 108, 255, 0.12);
+}
+
+.primary-btn:not(.danger-btn):not(.danger-outline-btn):disabled,
+.secondary-btn:not(.danger-btn):not(.danger-outline-btn):disabled,
+.button-link:not(.danger-btn):not(.danger-outline-btn):disabled,
+.popup-button:not(.danger-btn):not(.danger-outline-btn):disabled {
+  background: rgba(255, 255, 255, 0.45);
+  color: #8a94a6;
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: none;
+}
+
+.property-action-group,
+.comparison-final-controls,
+.mortgage-relationship-note,
+.mortgage-context-banner,
+.designer-mode-card,
+.design-confidence-strip {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.property-action-group .bookmark-btn.is-saved {
+  background: rgba(111, 108, 255, 0.08);
+  color: var(--kc-brand-deep, #5955f6);
+}
+
+.danger-outline-btn {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #991b1b;
+}
+
+.danger-outline-btn:hover {
+  background: #fee2e2;
+}
+
+.danger-btn {
+  color: #9b3340 !important;
+  border-color: #edb6bf !important;
+  background: #fff0f2 !important;
+}
+
+.final-choice-spotlight {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(111, 108, 255, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(111, 108, 255, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 255, 0.94));
+  border-radius: 28px;
+  box-shadow: 0 20px 48px rgba(31, 35, 51, 0.1);
+}
+
+.final-choice-image-wrap {
+  position: relative;
+  min-height: 290px;
+}
+
+.final-choice-image-wrap img {
+  width: 100%;
+  height: 100%;
+  min-height: 290px;
+  object-fit: cover;
+  display: block;
+}
+
+.final-choice-ribbon {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(15, 43, 69, 0.82);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.final-choice-body {
+  display: grid;
+  gap: 14px;
+  padding: 24px 24px 24px 0;
+  align-content: center;
+}
+
+.final-choice-topline,
+.final-choice-actions,
+.final-choice-meta-grid,
+.final-choice-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.final-choice-topline {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.final-choice-topline h2 {
+  margin: 4px 0 0;
+  color: #0d2b45;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.final-choice-location {
+  margin: 0;
+  color: #5a6d7e;
+  line-height: 1.55;
+}
+
+.final-choice-meta-grid span,
+.final-choice-notes article {
+  border: 1px solid rgba(111, 108, 255, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  padding: 12px 14px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.final-choice-meta-grid span strong {
+  display: block;
+  color: #111827;
+  font-size: 1.05rem;
+}
+
+.final-choice-notes article {
+  flex: 1 1 220px;
+}
+
+.final-choice-notes article span {
+  display: block;
+  color: #0f7a8a;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.final-choice-notes article p,
+.final-choice-empty-note {
+  margin: 5px 0 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.final-choice-empty-note {
+  border: 1px dashed rgba(111, 108, 255, 0.24);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.final-choice-extra {
+  color: #8a5c05;
+  font-weight: 800;
+}
+
+.mortgage-payment-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 16px;
+  align-items: stretch;
+  border: 1px solid rgba(15, 76, 129, 0.12);
+  border-radius: 24px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(111, 108, 255, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(248, 251, 255, 0.98), rgba(255, 255, 255, 0.94));
+}
+
+.mortgage-payment-hero span,
+.mortgage-term-strip span,
+.design-confidence-strip span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mortgage-payment-hero strong {
+  display: block;
+  margin: 7px 0;
+  color: #0d2b45;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1;
+}
+
+.mortgage-payment-hero p {
+  margin: 0;
+  color: #5a6d7e;
+  line-height: 1.55;
+}
+
+.mortgage-payment-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mortgage-payment-mini-grid article,
+.design-confidence-strip article {
+  border: 1px solid rgba(111, 108, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  padding: 14px;
+}
+
+.mortgage-payment-mini-grid small {
+  display: block;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.mortgage-payment-mini-grid b {
+  display: block;
+  margin-top: 5px;
+  color: #111827;
+}
+
+.mortgage-term-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mortgage-term-strip span {
+  border-radius: 999px;
+  padding: 8px 11px;
+  border: 1px solid rgba(111, 108, 255, 0.16);
+  background: rgba(255, 255, 255, 0.7);
+  color: #3f4a5f;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.design-confidence-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  border: 1px solid rgba(111, 108, 255, 0.12);
+  border-radius: 22px;
+  padding: 12px;
+  margin: 14px 0 18px;
+}
+
+.design-confidence-strip strong {
+  display: block;
+  margin: 6px 0 4px;
+  color: #0d2b45;
+  font-size: 1.25rem;
+}
+
+.design-confidence-strip small {
+  color: #5a6d7e;
+  line-height: 1.45;
+}
+
+.ar-catalog-preview,
+.ar-item-icon,
+.selected-item-title > span {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Inter, Arial, sans-serif;
+}
+
+@media (max-width: 900px) {
+  .final-choice-spotlight,
+  .mortgage-payment-hero,
+  .design-confidence-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .final-choice-body {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .mortgage-payment-mini-grid,
+  .final-choice-meta-grid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

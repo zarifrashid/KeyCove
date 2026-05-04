@@ -321,7 +321,12 @@ export default function PropertyDetailsPage() {
     }
   }
 
-  const openInsights = () => setShowInsights(true)
+  const openInsights = () => {
+    setShowInsights(true)
+    window.requestAnimationFrame(() => {
+      insightsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   const availableActions = useMemo(() => ({
     rent: getRentPrice(property) > 0,
@@ -382,35 +387,44 @@ export default function PropertyDetailsPage() {
                       <div><strong>Manager Email:</strong> {property.manager?.email || 'manager@keycove.demo'}</div>
                       <div><strong>Map Coordinates:</strong> {property.location?.latitude}, {property.location?.longitude}</div>
                     </div>
-                    <div className="hero-actions property-hero-actions">
-                      <Link to="/explore" className="secondary-btn">Back to Map</Link>
-                      <a
-                        className="primary-btn"
-                        href={buildPropertyMapUrl(property)}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open in Map
-                      </a>
+                    <div className="hero-actions property-hero-actions property-action-groups">
+                      <div className="property-action-group">
+                        <span className="property-action-group-label">Map</span>
+                        <Link to="/explore" className="secondary-btn">Back to Map</Link>
+                        <a
+                          className="primary-btn"
+                          href={buildPropertyMapUrl(property)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open in Map
+                        </a>
+                      </div>
+
+                      <div className="property-action-group">
+                        <span className="property-action-group-label">Explore</span>
+                        <button type="button" className="primary-btn ar-view-button" onClick={() => setShowARViewer(true)}>Design Rooms</button>
+                        <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
+                      </div>
+
                       {user?.role === 'tenant' ? (
-                        <button type="button" className="secondary-btn" onClick={() => setShowSharedBoardModal(true)}>
-                          Shared Search
-                        </button>
-                      ) : null}
-                      {user?.role === 'tenant' ? (
-                        <>
+                        <div className="property-action-group">
+                          <span className="property-action-group-label">Decision</span>
+                          <button type="button" className="secondary-btn" onClick={() => setShowSharedBoardModal(true)}>
+                            Shared Search
+                          </button>
                           <button type="button" className="secondary-btn" onClick={handleAddToCompare}>
                             Add to Compare
                           </button>
                           <Link to="/decision-hub" className="secondary-btn">Decision Hub</Link>
-                        </>
+                        </div>
                       ) : null}
-                      <button type="button" className="primary-btn ar-view-button" onClick={() => setShowARViewer(true)}>Design Rooms</button>
-                      <button type="button" className="secondary-btn" onClick={openInsights}>Neighbourhood Insights</button>
+
                       {user?.role === 'tenant' ? (
-                        <>
+                        <div className="property-action-group">
+                          <span className="property-action-group-label">Tenant Actions</span>
                           <div className="property-action-menu-wrap">
-                            <button type="button" className="primary-btn" onClick={() => setActionMenuOpen((previous) => !previous)}>
+                            <button type="button" className="secondary-btn" onClick={() => setActionMenuOpen((previous) => !previous)}>
                               Take Action
                             </button>
                             {actionMenuOpen ? (
@@ -429,7 +443,7 @@ export default function PropertyDetailsPage() {
                             <span>{favoriteIds.has(property._id) ? 'Saved' : 'Save'}</span>
                           </button>
                           <ReportListingButton property={property} />
-                        </>
+                        </div>
                       ) : null}
                     </div>
                     {contactState.error ? <p className="error-text">{contactState.error}</p> : null}
@@ -442,7 +456,7 @@ export default function PropertyDetailsPage() {
 
           {property ? (
             <>
-              <section className="property-quick-facts-grid">
+              <section className="property-quick-facts-grid property-details-essential-grid">
                 <FactCard label="Bedrooms" value={property.bedrooms} />
                 <FactCard label="Bathrooms" value={property.bathrooms} />
                 <FactCard label="Size" value={`${property.squareFeet} sqft`} />
@@ -452,36 +466,7 @@ export default function PropertyDetailsPage() {
                 <FactCard label="Security" value={property.amenities?.some((item) => ['CCTV', '24/7 Security'].includes(item)) ? 'Available' : 'Not listed'} />
               </section>
 
-              <section className="card property-section-card decision-tools-card">
-                <div className="property-section-heading">
-                  <p className="decision-eyebrow">KeyCove Decision Hub</p>
-                  <h2>Decision Tools</h2>
-                  <p>Inspect the listing quality, save private visit notes, and compare this property against your other shortlisted homes.</p>
-                </div>
-                <div className="decision-tools-grid">
-                  <article className="decision-tool-info-card">
-                    <span>Listing trust</span>
-                    <TrustBadge trust={trustBadge} property={property} expandedDefault />
-                    <p>This score rewards complete images, location, amenities, room dimensions, manager verification, and Design Rooms layout.</p>
-                  </article>
-                  <article className="decision-tool-info-card">
-                    <span>Design Rooms connection</span>
-                    <strong>{trustBadge?.hasDesignRoomsLayout ? 'Design Rooms Available' : 'No room design added yet'}</strong>
-                    <p>{trustBadge?.hasDesignRoomsLayout ? 'This listing has room-planning assets that improve confidence before a visit.' : 'Managers can add room dimensions or staging layout to make this listing more trustworthy.'}</p>
-                    <button type="button" className="secondary-btn" onClick={() => setShowARViewer(true)}>Open Design Rooms</button>
-                  </article>
-                </div>
-                {user?.role === 'tenant' ? (
-                  <DecisionNotePanel propertyId={property._id} onSaved={handleDecisionNoteSaved} />
-                ) : (
-                  <div className="decision-manager-note">
-                    <strong>Manager view</strong>
-                    <p>Improve this score by adding more images, full address details, amenities, room dimensions, and a tenant-facing Design Rooms layout. Tenant notes remain private.</p>
-                  </div>
-                )}
-              </section>
-
-              <section className="card property-section-card">
+              <section className="card property-section-card property-about-card">
                 <div className="property-section-heading">
                   <h2>About This Property</h2>
                   <p>Simple, readable details from your existing listing description.</p>
@@ -490,96 +475,14 @@ export default function PropertyDetailsPage() {
               </section>
 
               {showARViewer ? (
-                <div ref={arViewerRef}>
+                <div ref={arViewerRef} className="property-button-opened-panel">
                   <ARPropertyViewer property={property} user={user} onClose={() => setShowARViewer(false)} />
                 </div>
               ) : null}
 
-              <section className="card property-section-card">
-                <div className="property-section-heading">
-                  <h2>Amenities & Safety</h2>
-                  <p>KeyCove presents the property highlights in an easy-to-scan premium layout.</p>
-                </div>
-                <div className="property-amenity-sections">
-                  <div>
-                    <h3 className="property-subsection-title">Lifestyle & Building Amenities</h3>
-                    <div className="property-amenity-grid">
-                      {lifestyleAmenities.length ? lifestyleAmenities.map((item) => <AmenityCard key={item} label={item} />) : <p className="muted-text">No lifestyle amenities listed yet.</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="property-subsection-title">Safety & Utilities</h3>
-                    <div className="property-amenity-grid">
-                      {safetyAmenities.length ? safetyAmenities.map((item) => <AmenityCard key={item} label={item} />) : <p className="muted-text">No safety or utility items listed yet.</p>}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="card property-section-card">
-                <div className="property-section-heading">
-                  <h2>More Details</h2>
-                  <p>All useful stored property metadata that should be visible on the details page.</p>
-                </div>
-                <div className="property-more-details-grid">
-                  <DetailsRow label="Property Type" value={property.propertyType} />
-                  <DetailsRow label="Listing Type" value={property.listingType === 'sale' ? 'Sale' : 'Rent'} />
-                  <DetailsRow label="Sale / Rent" value={property.listingType === 'sale' ? 'Sale' : 'Rent'} />
-                  <DetailsRow label="Utilities Policy" value={property.policies?.utilities} />
-                  <DetailsRow label="Pet Policy" value={property.policies?.pet} />
-                  <DetailsRow label="Income Policy" value={property.policies?.income} />
-                  <DetailsRow label="Total Size" value={`${property.squareFeet} sqft`} />
-                  <DetailsRow label="City" value={property.location?.city} />
-                  <DetailsRow label="Area / Neighborhood" value={property.location?.area} />
-                  <DetailsRow label="Postal Code" value={property.location?.postalCode} />
-                  <DetailsRow label="Available From" value={formatDate(property.availableFrom)} />
-                  <DetailsRow label="School" value={property.nearbyPlaces?.school} />
-                  <DetailsRow label="Bus" value={property.nearbyPlaces?.bus} />
-                  <DetailsRow label="Restaurant" value={property.nearbyPlaces?.restaurant} />
-                  <DetailsRow label="Latitude" value={property.location?.latitude} />
-                  <DetailsRow label="Longitude" value={property.location?.longitude} />
-                  <DetailsRow label="Address" value={property.location?.address} />
-                  <DetailsRow label="Bedrooms" value={property.bedrooms} />
-                  <DetailsRow label="Bathrooms" value={property.bathrooms} />
-                  <DetailsRow label="Status" value={property.status} />
-                  <DetailsRow label="Amenities" value={property.amenities?.join(', ')} />
-                </div>
-              </section>
-
-              {user?.role === 'tenant' && property?.listingType === 'sale' ? (
-                <section className="card property-section-card">
-                  <div className="property-section-heading">
-                    <h2>Mortgage & Ownership Cost</h2>
-                    <p>This primary ownership tool is prefilled from the current sale listing so buyers can estimate monthly financing burden with context.</p>
-                  </div>
-                  <PropertyMortgageWidget property={property} />
-                </section>
-              ) : null}
-
-              {user?.role === 'tenant' && property?.listingType === 'rent' ? (
-                <section className="card property-section-card">
-                  <div className="property-section-heading">
-                    <h2>Rent Budget Check</h2>
-                    <p>Affordability stays focused on rent suitability. Mortgage tools are intentionally hidden on rent listings.</p>
-                  </div>
-                  <PropertyAffordabilityWidget
-                    summary={affordabilityState.summary}
-                    loading={affordabilityState.loading}
-                    error={affordabilityState.error}
-                    onRefresh={refreshAffordability}
-                  />
-                  <div className="mortgage-relationship-note rent-only-note">
-                    <h3>Ownership-only tool</h3>
-                    <p>This listing is marked for rent, so the mortgage calculator is hidden here to avoid mixing rent affordability with buy-side financing.</p>
-                  </div>
-                </section>
-              ) : null}
-
-              {showInsights ? (
-                <div ref={insightsRef}>
-                  <NeighbourhoodInsightsSection property={property} />
-                </div>
-              ) : null}
+              <div ref={insightsRef} className="property-insights-anchor">
+                <NeighbourhoodInsightsSection property={property} />
+              </div>
             </>
           ) : null}
         </div>
