@@ -17,6 +17,61 @@ function DecisionStatCard({ label, value, hint }) {
   )
 }
 
+function FinalChoiceSpotlight({ item, extraCount = 0 }) {
+  if (!item?.property?._id) return null
+
+  const property = item.property
+  const note = item.note || {}
+  const locationText = [property.location?.address, property.location?.area, property.location?.city].filter(Boolean).join(', ') || 'Location not listed'
+  const highlightNotes = [
+    note.pros ? { label: 'Best reason', value: note.pros } : null,
+    note.cons ? { label: 'Watch out', value: note.cons } : null
+  ].filter(Boolean)
+
+  return (
+    <section className="final-choice-spotlight" aria-label="Final chosen property">
+      <div className="final-choice-image-wrap">
+        <img src={getPropertyImage(property)} alt={property.imageAlt || property.title || 'Final choice property'} />
+        <span className="final-choice-ribbon">Final Choice</span>
+      </div>
+      <div className="final-choice-body">
+        <div className="final-choice-topline">
+          <div>
+            <p className="decision-eyebrow">Selected Home Spotlight</p>
+            <h2>{property.title || 'Untitled property'}</h2>
+          </div>
+          <TrustBadge trust={item.trustBadge} property={property} compact />
+        </div>
+        <p className="final-choice-location">{locationText}</p>
+        <div className="final-choice-meta-grid">
+          <span><strong>{formatCurrency(property.price, property.listingType)}</strong> Price</span>
+          <span><strong>{property.bedrooms ?? '-'}</strong> Beds</span>
+          <span><strong>{property.bathrooms ?? '-'}</strong> Baths</span>
+          <span><strong>{property.squareFeet || '-'}</strong> sqft</span>
+        </div>
+        {highlightNotes.length ? (
+          <div className="final-choice-notes">
+            {highlightNotes.map((entry) => (
+              <article key={entry.label}>
+                <span>{entry.label}</span>
+                <p>{entry.value}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="final-choice-empty-note">Add pros, cons, or visit notes to make your final decision look stronger in the demo.</p>
+        )}
+        {extraCount > 0 ? <small className="final-choice-extra">+{extraCount} more property marked final choice. Review notes to keep one strongest decision.</small> : null}
+        <div className="final-choice-actions">
+          <Link to={`/properties/${property._id}`} className="secondary-btn">View Details</Link>
+          <Link to={`/properties/${property._id}?ar=1`} className="secondary-btn">Design Rooms</Link>
+          <a href="#comparison" className="secondary-btn">Compare Again</a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function DecisionHubPage() {
   const [items, setItems] = useState([])
   const [compareItems, setCompareItems] = useState([])
@@ -52,6 +107,18 @@ export default function DecisionHubPage() {
     }
   }, [items])
 
+  const finalChoiceItems = useMemo(() => (
+    items
+      .filter((item) => item.note?.visitStatus === 'final_choice' || item.note?.decisionTags?.includes('final_choice'))
+      .sort((first, second) => {
+        const firstDate = new Date(first.note?.updatedAt || first.note?.createdAt || 0).getTime()
+        const secondDate = new Date(second.note?.updatedAt || second.note?.createdAt || 0).getTime()
+        return secondDate - firstDate
+      })
+  ), [items])
+
+  const finalChoiceItem = finalChoiceItems[0] || null
+
   return (
     <>
       <Navbar />
@@ -81,6 +148,8 @@ export default function DecisionHubPage() {
           <DecisionStatCard label="Visited" value={stats.visited} hint="Ready for serious comparison" />
           <DecisionStatCard label="Final Choice" value={stats.finalChoice} hint="Your strongest decision" />
         </section>
+
+        {finalChoiceItem ? <FinalChoiceSpotlight item={finalChoiceItem} extraCount={Math.max(finalChoiceItems.length - 1, 0)} /> : null}
 
         {status.loading ? <p className="muted-text">Loading Decision Hub...</p> : null}
         {status.error ? <p className="error-text">{status.error}</p> : null}

@@ -4,10 +4,10 @@ import { api } from '../../lib/api'
 const DEFAULT_FURNITURE = [
   { furnitureId: 'sofa-3-seat', name: '3-seat Sofa', category: 'living', itemType: 'furniture', icon: '🛋️', color: '#264f73', dimensions: { width: 84, depth: 36, height: 34 }, clearance: { front: 30, side: 12 } },
   { furnitureId: 'sectional-sofa', name: 'Sectional Sofa', category: 'living', itemType: 'furniture', icon: '🛋️', color: '#1f5f63', dimensions: { width: 110, depth: 70, height: 34 }, clearance: { front: 36, side: 12 } },
-  { furnitureId: 'tv-console', name: 'TV Console', category: 'living', itemType: 'furniture', icon: '▤', color: '#475569', dimensions: { width: 60, depth: 18, height: 24 }, clearance: { front: 24, side: 6 } },
+  { furnitureId: 'tv-console', name: 'TV Console', category: 'living', itemType: 'furniture', icon: '📺', color: '#475569', dimensions: { width: 60, depth: 18, height: 24 }, clearance: { front: 24, side: 6 } },
   { furnitureId: 'queen-bed', name: 'Queen Bed', category: 'bedroom', itemType: 'furniture', icon: '🛏️', color: '#8a5a44', dimensions: { width: 76, depth: 80, height: 30 }, clearance: { front: 30, side: 24 } },
   { furnitureId: 'single-bed', name: 'Single Bed', category: 'bedroom', itemType: 'furniture', icon: '🛏️', color: '#926c4f', dimensions: { width: 42, depth: 78, height: 28 }, clearance: { front: 24, side: 18 } },
-  { furnitureId: 'wardrobe', name: 'Wardrobe', category: 'bedroom', itemType: 'furniture', icon: '▥', color: '#725c45', dimensions: { width: 48, depth: 24, height: 78 }, clearance: { front: 30, side: 6 } },
+  { furnitureId: 'wardrobe', name: 'Wardrobe', category: 'bedroom', itemType: 'furniture', icon: '🚪', color: '#725c45', dimensions: { width: 48, depth: 24, height: 78 }, clearance: { front: 30, side: 6 } },
   { furnitureId: 'study-table', name: 'Study Table', category: 'study', itemType: 'furniture', icon: '🖥️', color: '#455a64', dimensions: { width: 48, depth: 26, height: 30 }, clearance: { front: 30, side: 8 } },
   { furnitureId: 'dining-table-4', name: 'Dining Table 4p', category: 'dining', itemType: 'furniture', icon: '🍽️', color: '#2f6f4e', dimensions: { width: 60, depth: 36, height: 30 }, clearance: { front: 36, side: 30 } },
   { furnitureId: 'chair', name: 'Chair', category: 'general', itemType: 'furniture', icon: '🪑', color: '#6b7280', dimensions: { width: 22, depth: 22, height: 34 }, clearance: { front: 18, side: 6 } },
@@ -26,6 +26,25 @@ const CATEGORY_LABELS = {
   decor: 'Decor',
   balcony: 'Balcony',
   general: 'General'
+}
+
+function getFurnitureIcon(item = {}) {
+  const candidate = String(item.icon || '').trim()
+  if (candidate && !['▣', '▤', '▥', '•'].includes(candidate)) return candidate
+
+  const text = `${item.name || ''} ${item.category || ''} ${item.itemType || ''}`.toLowerCase()
+  if (text.includes('sofa')) return '🛋️'
+  if (text.includes('bed')) return '🛏️'
+  if (text.includes('tv')) return '📺'
+  if (text.includes('wardrobe') || text.includes('closet')) return '🚪'
+  if (text.includes('table') || text.includes('desk') || text.includes('study')) return '🖥️'
+  if (text.includes('dining')) return '🍽️'
+  if (text.includes('chair')) return '🪑'
+  if (text.includes('fan')) return '🌀'
+  if (text.includes('light')) return '💡'
+  if (text.includes('plant') || text.includes('decor')) return '🪴'
+  if (text.includes('balcony')) return '☕'
+  return '◇'
 }
 
 const ROOM_RATIO_PRESETS = [
@@ -157,7 +176,7 @@ function makePlacement(item, roomId, index, room) {
     itemType: item.itemType || 'furniture',
     modelUrl: item.modelUrl || '',
     imageUrl: '',
-    icon: item.icon || '▣',
+    icon: getFurnitureIcon(item),
     color: item.color || '#0f4c81',
     position: { x, y, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
@@ -360,7 +379,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
     const stored = Array.isArray(arAssets.furnitureCatalog)
       ? arAssets.furnitureCatalog
         .filter((item) => item?.name && !/^https?:\/\//i.test(String(item.name).trim()))
-        .map((item) => ({ ...item, icon: item.icon || '▣', imageUrl: '', thumbnailUrl: '', itemType: item.itemType || 'furniture', dimensions: normalizeDimensions(item.dimensions), clearance: normalizeClearance(item) }))
+        .map((item) => ({ ...item, icon: getFurnitureIcon(item), imageUrl: '', thumbnailUrl: '', itemType: item.itemType || 'furniture', dimensions: normalizeDimensions(item.dimensions), clearance: normalizeClearance(item) }))
       : []
     return stored.length ? stored : DEFAULT_FURNITURE
   }, [arAssets.furnitureCatalog])
@@ -554,7 +573,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
       name: cleanName,
       category: normalized.includes('fan') || normalized.includes('light') ? 'fixture' : 'general',
       itemType: normalized.includes('fan') || normalized.includes('light') ? 'fixture' : 'furniture',
-      icon: normalized.includes('fan') ? '🌀' : normalized.includes('light') ? '💡' : cleanName[0]?.toUpperCase() || '▣',
+      icon: normalized.includes('fan') ? '🌀' : normalized.includes('light') ? '💡' : getFurnitureIcon({ name: cleanName, category: 'general' }),
       color: '#0f4c81',
       dimensions: { width: 42, depth: 30, height: 30 },
       clearance: { front: 18, side: 8 }
@@ -563,6 +582,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
     return {
       ...base,
       name: cleanName.toLowerCase() === base.name.toLowerCase() ? base.name : cleanName,
+      icon: getFurnitureIcon(base),
       dimensions: parsedDimensions ? normalizeDimensions({ ...base.dimensions, ...parsedDimensions }) : normalizeDimensions(base.dimensions),
       clearance: normalizeClearance(base)
     }
@@ -615,6 +635,24 @@ export default function ARPropertyViewer({ property, user, onClose }) {
         {!isManagerOwner && defaultPlacements.length ? (
           <button type="button" className="secondary-btn compact-btn" onClick={handleResetToManagerLayout}>Reset to Manager Layout</button>
         ) : null}
+      </div>
+
+      <div className="design-confidence-strip">
+        <article>
+          <span>Current room fit</span>
+          <strong>{roomAnalysis.label}</strong>
+          <small>{roomAnalysis.advice}</small>
+        </article>
+        <article>
+          <span>Rooms generated</span>
+          <strong>{rooms.length}</strong>
+          <small>Based on listing size and saved room dimensions.</small>
+        </article>
+        <article>
+          <span>Layout items</span>
+          <strong>{placements.length}</strong>
+          <small>Drag, resize, rotate, duplicate, or remove safely.</small>
+        </article>
       </div>
 
       <div className="ar-room-tabs" role="tablist" aria-label="Rooms">
@@ -689,7 +727,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
                   onPointerDown={(event) => handlePointerDown(event, item)}
                   title={`${item.name}. ${round(getItemFeet(item).width, 1)} × ${round(getItemFeet(item).depth, 1)} ft. Drag to move.`}
                 >
-                  <span className="ar-item-icon">{item.icon || '▣'}</span>
+                  <span className="ar-item-icon">{getFurnitureIcon(item)}</span>
                   <span className="ar-item-name">{item.name}</span>
                 </button>
               )
@@ -743,7 +781,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
               {filteredCatalog.map((item) => (
                 <button key={item.furnitureId || item.name} type="button" className="ar-catalog-card realistic-catalog-card" onClick={() => handleAddFurniture(item)}>
                   <span className="ar-catalog-preview" style={{ background: item.color || '#0f4c81' }}>
-                    {item.icon || '▣'}
+                    {getFurnitureIcon(item)}
                   </span>
                   <span>
                     <strong>{item.name}</strong>
@@ -775,7 +813,7 @@ export default function ARPropertyViewer({ property, user, onClose }) {
             {selectedPlacement ? (
               <>
                 <div className={`selected-item-title ${selectedStatus}`}>
-                  <span>{selectedPlacement.icon || '▣'}</span>
+                  <span>{getFurnitureIcon(selectedPlacement)}</span>
                   <div>
                     <strong>{selectedPlacement.name}</strong>
                     <small>{round(selectedFeet.width, 1)} × {round(selectedFeet.depth, 1)} ft · {selectedPlacement.dimensions?.width || 0} × {selectedPlacement.dimensions?.depth || 0} in</small>

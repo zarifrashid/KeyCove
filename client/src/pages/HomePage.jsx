@@ -54,7 +54,7 @@ export default function HomePage() {
   const [status, setStatus] = useState({ loading: true, seeding: false, error: '' })
   const [affordabilityProfile, setAffordabilityProfile] = useState(null)
   const [affordabilityFilterActive, setAffordabilityFilterActive] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(true)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isResultsOpen, setIsResultsOpen] = useState(true)
   const debounceRef = useRef(null)
   const { favoriteIds, toggleFavorite } = useFavorites()
