@@ -9215,3 +9215,109 @@ body.explore-map-active .results-side-card {
     display: grid;
   }
 }
+
+
+
+
+/* Final scoped UI fix: Admin + Manager Analytics layout only
+   Safe scope: CSS-only. No backend, route, database, auth, feature logic, or JSX changed. */
+
+.admin-command-wrap,
+.analytics-page-wrap {
+  width: min(1280px, calc(100% - 48px));
+  margin-left: auto;
+  margin-right: auto;
+  align-items: stretch;
+}
+
+.admin-stat-grid,
+.analytics-metric-grid {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+}
+
+.admin-stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.analytics-metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.analytics-two-column-grid {
+  width: 100%;
+  align-items: start;
+}
+
+.analytics-insight-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.analytics-insight-card .analytics-property-row {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.analytics-insight-card .analytics-property-main {
+  min-width: 0;
+}
+
+.analytics-insight-card .analytics-property-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analytics-insight-card .analytics-property-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.analytics-insight-card .analytics-property-actions .secondary-btn,
+.analytics-insight-card .analytics-property-actions .primary-btn {
+  width: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .admin-command-wrap,
+  .analytics-page-wrap {
+    width: min(100% - 24px, 1280px);
+  }
+
+  .admin-stat-grid,
+  .analytics-metric-grid,
+  .analytics-two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-insight-card .analytics-property-stats {
+    grid-template-columns: 1fr;
+  }
+}
+/* Manager verification document link visibility fix
+   Scope: Admin Manager Verification document link only. */
+
+.admin-document-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-left: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(111, 108, 255, 0.28);
+  background: #f7f6ff;
+  color: #5f58e8;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 8px 18px rgba(111, 108, 255, 0.08);
+}
+
+.admin-document-link:hover {
+  background: #eeecff;
+  border-color: rgba(111, 108, 255, 0.45);
+  color: #4f46e5;
+  text-decoration: none;
+}
