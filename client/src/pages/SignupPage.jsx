@@ -81,7 +81,10 @@ export default function SignupPage() {
     <div className="auth-shell login-page-fixed">
       <div className="auth-backdrop" aria-hidden="true" />
       <div className="login-reference-card signup-reference-card">
-        <div className="login-reference-form-panel signup-reference-form-panel">
+        <div
+          className="login-reference-form-panel signup-reference-form-panel"
+          style={{ overflowY: 'auto', maxHeight: '100vh' }}
+        >
           <div className="login-reference-brand">
             <span className="brand-dark">Key</span>
             <span className="brand-accent">Cove</span>
