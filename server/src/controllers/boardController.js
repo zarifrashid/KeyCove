@@ -124,7 +124,7 @@ async function getAcceptedMemberIds(boardId) {
   return members.map((item) => item.user?.toString()).filter(Boolean)
 }
 
-async function createNotifications({ boardId, recipients, actorId = null, type, title, body = '', relatedEntityType = '', relatedEntityId = null }) {
+async function createNotifications({ boardId, recipients, actorId = null, type, title, body = '', relatedEntityType = '', relatedEntityId = null, actionUrl = '' }) {
   const uniqueRecipients = [...new Set((recipients || []).map((item) => String(item)).filter(Boolean))]
   if (!uniqueRecipients.length) return []
 
@@ -148,7 +148,7 @@ async function createNotifications({ boardId, recipients, actorId = null, type, 
     type: 'system',
     relatedEntityType: 'sharedBoard',
     relatedEntityId: boardId,
-    actionUrl: `/shared-boards/${boardId}`,
+    actionUrl: actionUrl || `/shared-boards/${boardId}`,
     priority: type === 'invite' ? 'high' : 'normal'
   })
 
@@ -535,7 +535,8 @@ export async function inviteBoardMember(req, res) {
       title: `${req.user.name} invited you to ${access.board.title}`,
       body: 'Open Shared Search to accept or decline this board invitation.',
       relatedEntityType: 'boardMember',
-      relatedEntityId: membership._id
+      relatedEntityId: membership._id,
+      actionUrl: '/shared-boards'
     })
 
     emitBoardEventToUsers([invitee._id], 'board:inviteReceived', {
