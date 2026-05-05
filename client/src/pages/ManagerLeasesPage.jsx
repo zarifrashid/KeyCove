@@ -17,7 +17,7 @@ function addMonthsToDate(value, months = 12) {
 }
 
 function formatMoney(value, suffix = '') {
-  const amount = `৳ ${Number(value || 0).toLocaleString()}`
+  const amount = `à§³ ${Number(value || 0).toLocaleString()}`
   return suffix ? `${amount} ${suffix}` : amount
 }
 
@@ -26,6 +26,7 @@ export default function ManagerLeasesPage() {
   const [state, setState] = useState({
     loading: true,
     submitting: false,
+    reviewingId: '',
     statusUpdatingId: '',
     error: '',
     flash: '',
@@ -83,6 +84,13 @@ export default function ManagerLeasesPage() {
     [state.leases]
   )
 
+  const pendingRequests = useMemo(
+    () => state.requests.filter((request) => {
+      return request.status === 'pending' && ['rent', 'lease'].includes(request.actionType)
+    }),
+    [state.requests]
+  )
+
   const readyRequests = useMemo(
     () => state.requests.filter((request) => {
       return request.status === 'approved' && ['rent', 'lease'].includes(request.actionType) && !leaseRequestIds.has(request._id)
@@ -124,6 +132,34 @@ export default function ManagerLeasesPage() {
     })
 
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleReviewRequest = async (request, status, prepareAfterApprove = false) => {
+    try {
+      setState((previous) => ({ ...previous, reviewingId: request._id, error: '', flash: '' }))
+
+      const { data } = await api.patch(`/property-requests/${request._id}/status`, { status })
+      const updatedRequest = data.request || { ...request, status }
+
+      setState((previous) => ({
+        ...previous,
+        reviewingId: '',
+        flash: data.message || (status === 'approved' ? 'Request approved successfully.' : 'Request rejected successfully.'),
+        requests: previous.requests.map((item) => (item._id === request._id ? updatedRequest : item))
+      }))
+
+      if (status === 'approved' && prepareAfterApprove) {
+        applyReadyRequest(updatedRequest)
+      }
+
+      await fetchPageData(selectedFilter)
+    } catch (error) {
+      setState((previous) => ({
+        ...previous,
+        reviewingId: '',
+        error: error.response?.data?.message || 'Failed to update the request.'
+      }))
+    }
   }
 
   const handleFormChange = (field, value) => {
@@ -213,8 +249,8 @@ export default function ManagerLeasesPage() {
           <p className="badge">Feature 18</p>
           <h1>Lease Details</h1>
           <p>
-            Manage post-approval rental and lease records from one dedicated module. Approved rent and lease
-            requests can be turned into active lease records here without mixing them into request history.
+            Manage rental and lease requests from one dedicated module. Pending tenant requests can be approved here,
+            and approved rent or lease requests can be turned into active lease records.
           </p>
         </section>
 
@@ -351,12 +387,86 @@ export default function ManagerLeasesPage() {
         <section className="card manager-dashboard-list-card">
           <div className="manager-list-header">
             <div>
+              <h3>Pending Rent and Lease Requests</h3>
+              <p>New tenant rent and lease requests appear here first. Approve a request before creating the lease record.</p>
+            </div>
+          </div>
+
+          {state.loading ? (
+            <div className="manager-empty-state">
+              <h3>Loading pending requests...</h3>
+            </div>
+          ) : !pendingRequests.length ? (
+            <div className="manager-empty-state">
+              <h3>No pending rent or lease requests are waiting for review.</h3>
+            </div>
+          ) : (
+            <div className="lease-ready-grid">
+              {pendingRequests.map((request) => (
+                <article key={request._id} className="request-card lease-ready-card">
+                  <div className="request-card-topline">
+                    <div>
+                      <p className="badge">{request.actionType?.toUpperCase() || 'REQUEST'}</p>
+                      <h4>{request.property?.title || 'Property'}</h4>
+                    </div>
+                    <span className="manager-status-badge status-pending">pending</span>
+                  </div>
+
+                  <div className="request-card-grid">
+                    <div>
+                      <p><strong>Tenant:</strong> {request.tenantSnapshot?.name || request.tenant?.name || 'Tenant'}</p>
+                      <p><strong>Email:</strong> {request.tenantSnapshot?.email || request.tenant?.email || 'Not provided'}</p>
+                      <p><strong>Phone:</strong> {request.tenantSnapshot?.phone || request.tenant?.phone || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Area:</strong> {request.property?.location?.area || 'Not listed'}</p>
+                      <p><strong>Address:</strong> {request.property?.location?.address || 'Not listed'}</p>
+                      <p><strong>Monthly Rent:</strong> {formatMoney(request.pricing?.monthlyRent, '/ month')}</p>
+                      {request.actionType === 'lease' ? (
+                        <p><strong>Lease Months:</strong> {request.pricing?.leaseMonths || 12}</p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {request.note ? <p><strong>Tenant Message:</strong> {request.note}</p> : null}
+
+                  <div className="request-action-row">
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      disabled={state.reviewingId === request._id}
+                      onClick={() => handleReviewRequest(request, 'approved', true)}
+                    >
+                      {state.reviewingId === request._id ? 'Updating...' : 'Approve & Prepare Lease'}
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      disabled={state.reviewingId === request._id}
+                      onClick={() => handleReviewRequest(request, 'rejected')}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="card manager-dashboard-list-card">
+          <div className="manager-list-header">
+            <div>
               <h3>Approved Requests Ready for Lease</h3>
               <p>Only approved rent and lease requests appear here. Buy requests are excluded automatically.</p>
             </div>
           </div>
 
-          {!readyRequests.length ? (
+          {state.loading ? (
+            <div className="manager-empty-state">
+              <h3>Loading approved requests...</h3>
+            </div>
+          ) : !readyRequests.length ? (
             <div className="manager-empty-state">
               <h3>No approved rent or lease requests are waiting for lease creation.</h3>
             </div>
