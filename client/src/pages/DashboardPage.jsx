@@ -164,7 +164,7 @@ export default function DashboardPage() {
                 <Link to="/manager/analytics" className="secondary-btn">Listing Analytics</Link>
                 <Link to="/explore" className="secondary-btn">Open Explore Map</Link>
                 <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
-            <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
+                <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
               </div>
               <div className="info-grid manager-info-grid">
                 <div><strong>Name:</strong> {user?.name}</div>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
         <div className="card dashboard-card">
           <p className="badge">Tenant Dashboard</p>
           <h2>Welcome, {user?.name || 'User'}</h2>
-          <p>Your account is active. Explore listings, save favorites, track request history, and open your dedicated My Leases page directly from the top navigation bar.</p>
+          <p>Your account is active. Explore listings, save favorites, track request history, and open your dedicated My Leases page directly from this dashboard.</p>
           <div className="info-grid">
             <div><strong>Name:</strong> {user?.name}</div>
             <div><strong>Email:</strong> {user?.email}</div>
@@ -238,9 +238,9 @@ export default function DashboardPage() {
             <Link to="/affordability" className="secondary-btn">Affordability Analyzer</Link>
             <Link to="/recommendations" className="secondary-btn">View Recommendations</Link>
             <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
+            <Link to="/my-leases" className="secondary-btn">My Leases</Link>
             <Link to="/messages" className="secondary-btn">Messages{unreadTotal ? ` (${unreadTotal})` : ''}</Link>
             <Link to="/tenant/reports" className="secondary-btn">My Reports</Link>
-            <Link to="/shared-boards" className="secondary-btn">Shared Search</Link>
           </div>
         </div>
 
@@ -252,7 +252,6 @@ export default function DashboardPage() {
           error={requestState.error}
           emptyText="You have not submitted any property requests yet."
         />
-
 
         <MyRoommateGroupsSection />
 
