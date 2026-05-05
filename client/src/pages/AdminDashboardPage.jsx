@@ -433,7 +433,19 @@ export default function AdminDashboardPage() {
                     {item.verificationMessage ? <div className="verification-summary-wide"><strong>Manager Message:</strong> {item.verificationMessage}</div> : null}
                     {item.adminNote ? <div className="verification-summary-wide"><strong>Admin Note:</strong> {item.adminNote}</div> : null}
                     <div className="verification-summary-wide">
-                      <strong>Document:</strong> <a href={item.documentUrl} target="_blank" rel="noreferrer">Open submitted document</a>
+                      <strong>Document:</strong>{" "}
+                      {item.documentUrl ? (
+                        <a
+                          href={item.documentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-document-link"
+                        >
+                          📄 Open Submitted Document ↗
+                        </a>
+                      ) : (
+                        <span className="muted-text">No document submitted</span>
+                      )}
                     </div>
                   </div>
 
