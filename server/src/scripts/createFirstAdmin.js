@@ -22,6 +22,8 @@ async function createFirstAdmin() {
     if (existingAdmin) {
       existingAdmin.role = 'admin'
       existingAdmin.accountStatus = 'active'
+      existingAdmin.emailVerified = true
+      existingAdmin.emailVerifiedAt = existingAdmin.emailVerifiedAt || new Date()
       existingAdmin.adminProfile = existingAdmin.adminProfile || { department: 'Operations', accessLevel: 1 }
       await existingAdmin.save()
       console.log('Admin already exists and is active.')
@@ -35,6 +37,8 @@ async function createFirstAdmin() {
       name: 'KeyCove Admin',
       email: ADMIN_EMAIL.toLowerCase(),
       password: hashedPassword,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
       role: 'admin',
       accountStatus: 'active',
       adminProfile: {

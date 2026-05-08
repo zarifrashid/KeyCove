@@ -2,6 +2,12 @@ import mongoose from 'mongoose'
 
 const propertySchema = new mongoose.Schema(
   {
+    seedKey: {
+      type: String,
+      trim: true,
+      default: '',
+      index: true
+    },
     title: {
       type: String,
       trim: true,

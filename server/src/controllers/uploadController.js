@@ -72,6 +72,17 @@ export async function uploadPropertyImages(req, res) {
       }
 
       const safeName = sanitizeBaseName(incomingFile?.name)
+
+      if (process.env.VERCEL === '1' || String(process.env.UPLOAD_STORAGE_MODE || '').toLowerCase() === 'data-url') {
+        savedFiles.push({
+          url: incomingFile.dataUrl,
+          source: 'vercel-data-url',
+          uploadedAt: new Date().toISOString(),
+          originalName: incomingFile?.name || `${safeName}.${extension}`
+        })
+        continue
+      }
+
       const filename = `${Date.now()}-${index}-${safeName}.${extension}`
       await fs.writeFile(path.join(UPLOAD_DIR, filename), buffer)
 

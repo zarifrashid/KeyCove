@@ -13,7 +13,10 @@ export default function SignupPage() {
   })
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const { register, login } = useAuth()
+  const [submittedEmail, setSubmittedEmail] = useState('')
+  const [resending, setResending] = useState(false)
+  const [devVerificationUrl, setDevVerificationUrl] = useState('')
+  const { register, resendVerification } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -67,13 +70,36 @@ export default function SignupPage() {
     e.preventDefault()
     setError('')
     setMessage('')
+    setDevVerificationUrl('')
     try {
       const data = await register(form)
-      setMessage(data.message || 'Account created successfully.')
-      await login({ email: form.email, password: form.password })
-      setTimeout(() => navigate('/'), 500)
+      setSubmittedEmail(form.email)
+      setMessage(data.message || 'Account created successfully. Please verify your email before logging in.')
+      setDevVerificationUrl(data.devVerificationUrl || '')
+
+      if (!data.requiresEmailVerification) {
+        setTimeout(() => navigate('/login'), 500)
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed')
+    }
+  }
+
+  const handleResendVerification = async () => {
+    const targetEmail = submittedEmail || form.email
+    if (!targetEmail) return
+
+    setResending(true)
+    setError('')
+    setDevVerificationUrl('')
+    try {
+      const data = await resendVerification(targetEmail)
+      setMessage(data.message || 'Verification email sent. Please check your inbox.')
+      setDevVerificationUrl(data.devVerificationUrl || '')
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not resend verification email')
+    } finally {
+      setResending(false)
     }
   }
 
@@ -145,10 +171,27 @@ export default function SignupPage() {
           </form>
 
           {message && <p className="success-text login-error-text">{message}</p>}
+          {devVerificationUrl ? (
+            <p className="login-error-text auth-dev-link">
+              Dev link: <a href={devVerificationUrl}>{devVerificationUrl}</a>
+            </p>
+          ) : null}
+          {submittedEmail ? (
+            <div className="auth-action-row">
+              <button
+                type="button"
+                className="secondary-btn auth-secondary-action"
+                onClick={handleResendVerification}
+                disabled={resending}
+              >
+                {resending ? 'Sending...' : 'Resend verification email'}
+              </button>
+            </div>
+          ) : null}
           {error && <p className="error-text login-error-text">{error}</p>}
 
           <p className="login-reference-footer">
-            Already have an account?<nobr> </nobr>
+            Already verified?<nobr> </nobr>
             <Link to="/login">Login</Link>
           </p>
         </div>

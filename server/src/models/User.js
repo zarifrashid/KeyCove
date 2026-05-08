@@ -18,6 +18,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    emailVerified: {
+      type: Boolean,
+      default: true
+    },
+    emailVerifiedAt: {
+      type: Date,
+      default: null
+    },
+    emailVerificationTokenHash: {
+      type: String,
+      default: '',
+      select: false
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
+      select: false
+    },
     role: {
       type: String,
       enum: ['tenant', 'manager', 'admin'],
