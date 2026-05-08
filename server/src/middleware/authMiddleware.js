@@ -11,7 +11,7 @@ export async function protect(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallbacksecret')
     const user = await User.findById(decoded.userId).select(
-      '_id role name email phone companyName accountStatus isManagerVerified managerVerificationStatus adminProfile applicationProfile'
+      '_id role name email emailVerified phone companyName accountStatus isManagerVerified managerVerificationStatus adminProfile applicationProfile'
     )
 
     if (!user) {
@@ -28,6 +28,7 @@ export async function protect(req, res, next) {
       role: user.role,
       name: user.name,
       email: user.email,
+      emailVerified: user.emailVerified !== false,
       phone: user.phone || '',
       companyName: user.companyName || '',
       accountStatus,

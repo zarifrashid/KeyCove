@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 import DashboardPage from './pages/DashboardPage'
 import PropertyDetailsPage from './pages/PropertyDetailsPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -134,6 +135,7 @@ export default function App() {
           </AuthOnlyRoute>
         }
       />
+      <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
       <Route
         path="/affordability"
         element={

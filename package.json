@@ -1,11 +1,13 @@
 {
-  "name": "keycove-server",
+  "name": "keycove-vercel",
+  "private": true,
   "version": "0.0.1",
-  "main": "src/server.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "start": "node server/src/server.js",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

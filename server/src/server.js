@@ -32,11 +32,44 @@ dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 const app = express()
 const PORT = process.env.PORT || 5000
+const isVercel = process.env.VERCEL === '1'
+
+function getAllowedOrigins() {
+  const configuredOrigins = String(process.env.CLIENT_URL || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+  if (isVercel) {
+    configuredOrigins.push('https://*.vercel.app')
+  }
+
+  return configuredOrigins
+}
+
+function isOriginAllowed(origin, allowedOrigins) {
+  if (!origin) return true
+  if (allowedOrigins.includes(origin)) return true
+  return allowedOrigins.some((allowedOrigin) => {
+    if (!allowedOrigin.includes('*')) return false
+    const pattern = new RegExp(`^${allowedOrigin.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace('\\*', '.*')}$`)
+    return pattern.test(origin)
+  })
+}
+
+app.set('trust proxy', 1)
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin(origin, callback) {
+    const allowedOrigins = getAllowedOrigins()
+    if (isOriginAllowed(origin, allowedOrigins)) {
+      return callback(null, true)
+    }
+    return callback(new Error('Not allowed by CORS'))
+  },
   credentials: true
 }))
 app.use(express.json({ limit: '50mb' }))
@@ -79,9 +112,24 @@ app.use('/api/recently-viewed', recentlyViewedRoutes)
 app.use('/api/faqs', faqRoutes)
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')))
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`)
-    startLeaseNotificationScheduler()
-  })
+let startupPromise = null
+async function startApp() {
+  if (!startupPromise) {
+    startupPromise = connectDB().then(() => {
+      if (!isVercel) {
+        startLeaseNotificationScheduler()
+      }
+    })
+  }
+  return startupPromise
+}
+
+startApp().then(() => {
+  if (!isVercel) {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`)
+    })
+  }
 })
+
+export default app

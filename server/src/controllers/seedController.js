@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import User from '../models/User.js'
 import Property from '../models/Property.js'
-import { buildDhakaProperties } from '../data/dhakaSeedData.js'
+import { buildNewDhakaProperties } from '../data/dhakaSeedData.js'
 
 export async function seedDhakaProperties(req, res) {
   try {
@@ -14,20 +14,31 @@ export async function seedDhakaProperties(req, res) {
         name: 'KeyCove Demo Manager',
         email: managerEmail,
         password: hashedPassword,
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
         role: 'manager',
         phone: '+8801711000000',
         companyName: 'KeyCove Realty'
       })
+    } else if (manager.emailVerified === false) {
+      manager.emailVerified = true
+      manager.emailVerifiedAt = manager.emailVerifiedAt || new Date()
+      await manager.save()
     }
 
-    await Property.deleteMany({ 'location.city': 'Dhaka' })
-    const propertyDocs = buildDhakaProperties(manager._id)
-    const created = await Property.insertMany(propertyDocs)
+    const propertyDocs = buildNewDhakaProperties(manager._id)
+    const results = await Promise.all(propertyDocs.map((propertyDoc) => (
+      Property.findOneAndUpdate(
+        { seedKey: propertyDoc.seedKey },
+        { $set: propertyDoc },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      )
+    )))
 
     res.status(201).json({
       success: true,
-      message: 'Dhaka map seed created successfully',
-      createdCount: created.length,
+      message: '20 new Dhaka demo properties were seeded or updated successfully.',
+      createdOrUpdatedCount: results.length,
       demoManager: {
         email: managerEmail,
         password: 'manager123'

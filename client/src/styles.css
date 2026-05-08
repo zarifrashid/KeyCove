@@ -9321,3 +9321,31 @@ body.explore-map-active .results-side-card {
   color: #4f46e5;
   text-decoration: none;
 }
+/* Email verification UI additions */
+.auth-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.auth-secondary-action {
+  border: 0;
+  text-decoration: none;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.auth-dev-link {
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+}
+
+.verify-email-card {
+  min-height: 460px;
+}
+
+.verify-email-panel {
+  justify-content: center;
+}
